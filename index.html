@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#111827">
+<title>Domino Match Manager</title>
+<style>
+:root{--bg:#0b1020;--panel:#141c2f;--panel2:#1b2740;--line:#2a3854;--text:#f3f6fc;--muted:#9eacc4;--green:#4ade80;--gold:#fbbf24;--red:#fb7185;--blue:#7dd3fc}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#17243e 0,#0b1020 55%);color:var(--text);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
+button,input{font:inherit}button{cursor:pointer;border:1px solid var(--line);background:#25324b;color:var(--text);border-radius:12px;padding:10px 14px;font-weight:650}button:hover{filter:brightness(1.12)}button:disabled{opacity:.45;cursor:not-allowed}.primary{background:var(--green);color:#062412;border-color:transparent}.danger{background:#472331;color:#fecdd3;border-color:#743248}.subtle{background:transparent}.wrap{max-width:1180px;margin:auto;padding:22px 16px 48px}
+header{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:24px}.brand{display:flex;gap:12px;align-items:center}.logo{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,#4ade80,#7dd3fc);color:#081522;font-size:25px;font-weight:900}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:var(--green);font-weight:800}.title{font-size:clamp(25px,4vw,34px);font-weight:850;letter-spacing:-.04em;margin:0}.muted{color:var(--muted)}.status{border:1px solid #2d684a;background:#133324;color:#86efac;padding:7px 11px;border-radius:99px;font-size:12px;font-weight:800}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}.stat,.panel{background:rgba(20,28,47,.92);border:1px solid var(--line);border-radius:18px}.stat{padding:16px}.stat .num{font-size:27px;font-weight:850;letter-spacing:-.04em}.stat .label{color:var(--muted);font-size:12px}
+.layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,.85fr);gap:16px;align-items:start}.panel{padding:18px;margin-bottom:16px}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}.panel h2{font-size:17px;margin:0;font-weight:800}.pill{font-size:11px;padding:5px 9px;border:1px solid var(--line);border-radius:99px;color:var(--muted)}
+.players{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.player{background:linear-gradient(145deg,#1c2942,#131d31);border:1px solid #30405e;border-radius:16px;padding:14px;min-width:0}.player-top{display:flex;gap:10px;align-items:center}.avatar{width:40px;height:40px;border-radius:13px;background:#263a53;display:grid;place-items:center;color:var(--blue);font-weight:850;flex-shrink:0}.player-name{font-weight:800;overflow-wrap:anywhere}.player-sub{font-size:12px;color:var(--muted)}.player-score{display:flex;justify-content:space-between;align-items:end;margin-top:17px}.score{font-size:28px;font-weight:900;letter-spacing:-.05em}.pts{font-size:11px;color:var(--muted)}.round-form{display:grid;gap:12px}.rank-row{display:grid;grid-template-columns:78px minmax(0,1fr);align-items:center;gap:10px}.rank-label{font-size:13px;font-weight:800}.rank-label span{color:var(--green)}select,input{width:100%;min-width:0;background:#0d1526;color:var(--text);border:1px solid var(--line);border-radius:11px;padding:11px 12px;outline:none}select:focus,input:focus{border-color:var(--blue)}.form-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:4px}.queue-list{display:grid;gap:8px}.queue-item{display:flex;align-items:center;gap:10px;padding:10px;background:#10192b;border:1px solid #24334c;border-radius:12px}.queue-no{width:28px;height:28px;border-radius:9px;background:#25324b;display:grid;place-items:center;color:var(--blue);font-weight:850;font-size:12px}.queue-name{flex:1;font-weight:700;overflow-wrap:anywhere}.empty{padding:18px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:13px;font-size:13px}.inline-form{display:flex;gap:8px;margin-top:12px}.inline-form input{flex:1}.inline-form button{white-space:nowrap}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:420px}th,td{text-align:left;padding:11px 9px;border-bottom:1px solid #26344d;font-size:13px}th{color:var(--muted);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.06em}td:last-child,th:last-child{text-align:right}.rank-number{display:inline-grid;place-items:center;width:25px;height:25px;border-radius:8px;background:#26344d;font-weight:800}.winner{color:var(--gold)}.history-list{display:grid;gap:9px}.history-item{border:1px solid var(--line);border-radius:13px;padding:12px;background:#10192b}.history-top{display:flex;justify-content:space-between;gap:10px;margin-bottom:6px;font-weight:800}.history-detail{color:var(--muted);font-size:12px;overflow-wrap:anywhere}.small-btn{padding:6px 9px;font-size:12px}.footer-note{color:var(--muted);font-size:12px;text-align:center;margin-top:16px}.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);padding:11px 16px;background:#e2e8f0;color:#0b1020;border-radius:12px;box-shadow:0 8px 40px #0007;display:none;z-index:5;max-width:90vw}.toast.show{display:block}.section-gap{margin-top:16px}
+@media(max-width:780px){.layout{grid-template-columns:1fr}.stats{gap:8px}.stat{padding:12px}.stat .num{font-size:23px}.panel{padding:14px}.wrap{padding:17px 12px 36px}}
+@media(max-width:420px){.players{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,minmax(0,1fr))}.stat .label{font-size:10px}.stat .num{font-size:20px}.inline-form{flex-wrap:wrap}.inline-form button{width:100%}.rank-row{grid-template-columns:70px minmax(0,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="brand"><div class="logo">D</div><div><div class="eyebrow">Table & Score Manager</div><h1 class="title">Domino Match</h1><div class="muted" style="font-size:13px">Kelola meja, antrean, dan poin dalam satu tempat.</div></div></div>
+  <div class="status" id="statusBadge">● SIAP DIMULAI</div>
+</header>
+<section class="stats">
+  <div class="stat"><div class="label">PEMAIN TERDAFTAR</div><div class="num" id="statPlayers">0</div></div>
+  <div class="stat"><div class="label">RONDE SELESAI</div><div class="num" id="statRounds">0</div></div>
+  <div class="stat"><div class="label">PEMAIN AKTIF</div><div class="num" id="statActive">0/4</div></div>
+</section>
+<div class="layout">
+<main>
+  <section class="panel">
+    <div class="panel-head"><h2>♟ Sedang bermain</h2><span class="pill" id="tablePill">Meja 1 · 0/4 pemain</span></div>
+    <div class="players" id="activePlayers"></div>
+    <div class="empty" id="activeEmpty">Tambahkan minimal 4 pemain untuk memulai.</div>
+  </section>
+  <section class="panel">
+    <div class="panel-head"><h2>🏁 Input hasil ronde</h2><span class="pill">Juara 1–4</span></div>
+    <p class="muted" style="font-size:13px;margin-top:-5px">Pilih nama pemain untuk setiap posisi juara. Setiap nama hanya boleh dipilih sekali. Poin otomatis ditambahkan, lalu juara 4 diganti orang pertama di antrean.</p>
+    <form id="resultForm" class="round-form">
+      <div id="rankFields"></div>
+      <div class="form-actions"><button class="primary" id="submitResult" type="submit">Simpan hasil & rotasi →</button><button type="button" class="subtle" id="resetRanks">Reset pilihan</button></div>
+    </form>
+  </section>
+  <section class="panel">
+    <div class="panel-head"><h2>🏆 Klasemen poin</h2><span class="pill">Total sepanjang sesi</span></div>
+    <div class="table-wrap"><table><thead><tr><th>#</th><th>Nama pemain</th><th>Ronde</th><th>Poin</th></tr></thead><tbody id="leaderboard"></tbody></table></div>
+    <div class="empty" id="leaderEmpty">Klasemen muncul setelah pemain ditambahkan.</div>
+  </section>
+  <section class="panel">
+    <div class="panel-head"><h2>🕘 Riwayat ronde</h2><button class="small-btn subtle" id="undoBtn" disabled>Batalkan ronde terakhir</button></div>
+    <div class="history-list" id="history"></div>
+    <div class="empty" id="historyEmpty">Belum ada ronde yang disimpan.</div>
+  </section>
+</main>
+<aside>
+  <section class="panel">
+    <div class="panel-head"><h2>⏳ Antrean pemain</h2><span class="pill" id="queuePill">0 menunggu</span></div>
+    <div class="queue-list" id="queueList"></div>
+    <div class="empty" id="queueEmpty">Belum ada pemain menunggu.</div>
+    <form class="inline-form" id="addPlayerForm"><input id="playerName" maxlength="32" placeholder="Nama pemain baru" autocomplete="off" required><button class="primary" type="submit">+ Tambah</button></form>
+  </section>
+  <section class="panel">
+    <div class="panel-head"><h2>⚙️ Pengaturan sesi</h2></div>
+    <label class="muted" for="sessionName" style="display:block;font-size:12px;margin-bottom:6px">Nama sesi (opsional)</label>
+    <input id="sessionName" maxlength="50" placeholder="Contoh: Domino malam Jumat">
+    <div class="form-actions section-gap"><button id="startBtn" class="primary">Mulai sesi</button><button id="exportBtn">Ekspor JSON</button><button id="clearBtn" class="danger">Reset semua data</button></div>
+    <p class="muted" style="font-size:12px;margin-bottom:0">Data tersimpan di browser perangkat ini. Ekspor JSON untuk membuat cadangan. Reset menghapus sesi lokal setelah konfirmasi.</p>
+  </section>
+  <section class="panel">
+    <div class="panel-head"><h2>📋 Aturan poin</h2></div>
+    <div class="queue-list">
+      <div class="queue-item"><div class="queue-no winner">1</div><div class="queue-name">Juara 1</div><strong>+4</strong></div>
+      <div class="queue-item"><div class="queue-no">2</div><div class="queue-name">Juara 2</div><strong>+3</strong></div>
+      <div class="queue-item"><div class="queue-no">3</div><div class="queue-name">Juara 3</div><strong>+2</strong></div>
+      <div class="queue-item"><div class="queue-no" style="color:var(--red)">4</div><div class="queue-name">Juara 4 · keluar</div><strong>+1</strong></div>
+    </div>
+    <p class="muted" style="font-size:12px;margin-bottom:0">Pemain yang keluar tetap menyimpan total poinnya. Jika antrean kosong, juara 4 keluar dan meja menyisakan tiga pemain sampai pengganti ditambahkan.</p>
+  </section>
+</aside>
+</div>
+<div class="footer-note">Domino Match Manager · Penyimpanan lokal browser · Tidak perlu akun</div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+(() => {
+const KEY = "domino-match-manager-v1";
+const POINTS = [4,3,2,1];
+const $ = id => document.getElementById(id);
+let state = load();
+let undoSnapshot = null;
+function fresh(){return {sessionName:"",started:false,players:[],active:[],queue:[],rounds:[],nextId:1,nextQueueOrder:1};}
+function load(){try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&Array.isArray(x.players)&&Array.isArray(x.active)&&Array.isArray(x.queue)&&Array.isArray(x.rounds))return x;}catch(e){}return fresh();}
+function persist(){localStorage.setItem(KEY,JSON.stringify(state));}
+function toast(msg){const el=$("toast");el.textContent=msg;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),2500);}
+function player(id){return state.players.find(p=>p.id===id);}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function addPlayer(name){
+ name=name.trim();if(!name)return;
+ if(state.players.some(p=>p.name.toLocaleLowerCase()===name.toLocaleLowerCase())){toast("Nama pemain sudah terdaftar.");return;}
+ const p={id:state.nextId++,name,points:0,rounds:0,queueOrder:state.nextQueueOrder++};
+ state.players.push(p);
+ if(state.active.length<4 && !state.started){state.active.push(p.id);}
+ else state.queue.push(p.id);
+ persist();render();$("playerName").value="";toast(name+" ditambahkan.");
+}
+function startSession(){
+ if(state.players.length<4){toast("Tambahkan minimal 4 pemain terlebih dahulu.");return;}
+ if(state.active.length<4){
+   while(state.active.length<4 && state.queue.length) state.active.push(state.queue.shift());
+ }
+ if(state.active.length!==4){toast("Meja perlu tepat 4 pemain untuk memulai.");return;}
+ state.started=true;state.sessionName=$("sessionName").value.trim();persist();render();toast("Sesi dimulai.");
+}
+function render(){
+ $("sessionName").value=state.sessionName||"";
+ $("statPlayers").textContent=state.players.length;
+ $("statRounds").textContent=state.rounds.length;
+ $("statActive").textContent=state.active.length+"/4";
+ $("tablePill").textContent=`Meja 1 · ${state.active.length}/4 pemain`;
+ $("queuePill").textContent=state.queue.length+" menunggu";
+ $("statusBadge").textContent=state.started?"● SESI BERJALAN":"● SIAP DIMULAI";
+ $("activeEmpty").style.display=state.active.length?"none":"block";
+ $("activePlayers").innerHTML=state.active.map((id,i)=>{const p=player(id);if(!p)return "";return `<div class="player"><div class="player-top"><div class="avatar">${escapeHtml(p.name.slice(0,1).toUpperCase())}</div><div><div class="player-name">${escapeHtml(p.name)}</div><div class="player-sub">Pemain meja · ${i+1}</div></div></div><div class="player-score"><div><div class="score">${p.points}</div><div class="pts">TOTAL POIN</div></div><div class="player-sub">${p.rounds} ronde</div></div></div>`}).join("");
+ $("queueEmpty").style.display=state.queue.length?"none":"block";
+ $("queueList").innerHTML=state.queue.map((id,i)=>{const p=player(id);if(!p)return "";return `<div class="queue-item"><div class="queue-no">${i+1}</div><div class="queue-name">${escapeHtml(p.name)}</div><button class="small-btn subtle" data-remove="${id}" title="Hapus dari sesi">×</button></div>`}).join("");
+ $("rankFields").innerHTML=[1,2,3,4].map(rank=>`<div class="rank-row"><label class="rank-label" for="winner-${rank}">Juara ${rank}<br><span>+${POINTS[rank-1]} poin${rank===4?" · keluar":""}</span></label><select id="winner-${rank}" name="winner-${rank}" required><option value="">Pilih nama pemain…</option>${state.active.map(id=>{const p=player(id);return `<option value="${id}">${escapeHtml(p.name)}</option>`}).join("")}</select></div>`).join("");
+ const ready=state.started&&state.active.length===4;
+ $("submitResult").disabled=!ready;
+ $("startBtn").disabled=state.started;
+ $("startBtn").textContent=state.started?"Sesi berjalan":"Mulai sesi";
+ $("leaderEmpty").style.display=state.players.length?"none":"block";
+ const sorted=[...state.players].sort((a,b)=>b.points-a.points||a.name.localeCompare(b.name));
+ $("leaderboard").innerHTML=sorted.map((p,i)=>`<tr><td><span class="rank-number ${i===0?"winner":""}">${i+1}</span></td><td><strong>${escapeHtml(p.name)}</strong>${state.active.includes(p.id)?' <span style="color:var(--green);font-size:10px">● AKTIF</span>':""}</td><td>${p.rounds}</td><td><strong>${p.points}</strong></td></tr>`).join("");
+ $("historyEmpty").style.display=state.rounds.length?"none":"block";
+ $("history").innerHTML=[...state.rounds].reverse().map(r=>`<div class="history-item"><div class="history-top"><span>Ronde #${r.number}</span><span class="muted" style="font-size:11px;font-weight:500">${escapeHtml(r.time)}</span></div><div class="history-detail">${r.results.map(x=>`${x.rank}. ${escapeHtml(x.name)} (+${x.points})`).join(" · ")}</div><div class="history-detail" style="margin-top:5px">Keluar: <strong>${escapeHtml(r.loserName)}</strong>${r.replacementName?` · Masuk: <strong>${escapeHtml(r.replacementName)}</strong>`:" · Antrean kosong, menunggu pengganti"}</div></div>`).join("");
+ $("undoBtn").disabled=state.rounds.length===0;
+}
+$("addPlayerForm").addEventListener("submit",e=>{e.preventDefault();addPlayer($("playerName").value);});
+$("startBtn").addEventListener("click",startSession);
+$("sessionName").addEventListener("change",()=>{state.sessionName=$("sessionName").value.trim();persist();});
+$("rankFields").addEventListener("change",()=>{
+ const chosen=[1,2,3,4].map(n=>$("winner-"+n)?.value).filter(Boolean);
+ [1,2,3,4].forEach(n=>{
+   const sel=$("winner-"+n); if(!sel)return;
+   [...sel.options].forEach(opt=>{if(opt.value)opt.disabled=chosen.includes(opt.value)&&opt.value!==sel.value;});
+ });
+});
+$("resetRanks").addEventListener("click",()=>{
+ [1,2,3,4].forEach(n=>{const el=$("winner-"+n);if(el)el.value="";});
+ $("rankFields").dispatchEvent(new Event("change",{bubbles:true}));
+});
+$("resultForm").addEventListener("submit",e=>{
+ e.preventDefault();
+ if(!state.started||state.active.length!==4){toast("Mulai sesi dengan empat pemain aktif terlebih dahulu.");return;}
+ const results=[];
+ for(const rank of [1,2,3,4]){
+   const id=Number($("winner-"+rank).value);
+   if(!id||!state.active.includes(id)){toast("Pilih nama pemain untuk Juara "+rank+".");return;}
+   results.push({id,rank,points:POINTS[rank-1],name:player(id).name});
+ }
+ if(new Set(results.map(x=>x.id)).size!==4){toast("Satu pemain tidak boleh mendapat dua peringkat. Pilih empat nama yang berbeda.");return;}
+ undoSnapshot=JSON.stringify(state);
+ results.forEach(r=>{const p=player(r.id);p.points+=r.points;p.rounds+=1;});
+ results.sort((a,b)=>a.rank-b.rank);
+ const loser=results.find(r=>r.rank===4);
+ state.active=results.filter(r=>r.rank!==4).map(r=>r.id);
+ let replacementId=null;
+ if(state.queue.length){replacementId=state.queue.shift();state.active.push(replacementId);}
+ const round={number:state.rounds.length+1,time:new Date().toLocaleString("id-ID"),results:results.map(({rank,points,name,id})=>({rank,points,name,id})),loserId:loser.id,loserName:loser.name,replacementId,replacementName:replacementId?player(replacementId).name:null};
+ state.rounds.push(round);
+ persist();render();
+ toast(replacementId?`${loser.name} keluar, ${player(replacementId).name} masuk.`:`${loser.name} keluar. Antrean kosong.`);
+});
+$("queueList").addEventListener("click",e=>{
+ const btn=e.target.closest("[data-remove]");if(!btn)return;
+ const id=Number(btn.dataset.remove);const p=player(id);if(!p)return;
+ if(!confirm(`Hapus ${p.name} dari antrean dan sesi? Poinnya akan dihapus juga.`))return;
+ state.queue=state.queue.filter(x=>x!==id);state.players=state.players.filter(x=>x.id!==id);persist();render();toast("Pemain dihapus.");
+});
+$("undoBtn").addEventListener("click",()=>{
+ if(!state.rounds.length)return;
+ if(!confirm("Batalkan ronde terakhir? Poin dan posisi pemain akan dikembalikan ke kondisi sebelum ronde tersebut."))return;
+ // Rebuild by restoring the snapshot captured just before latest result.
+ if(undoSnapshot){state=JSON.parse(undoSnapshot);undoSnapshot=null;persist();render();toast("Ronde terakhir dibatalkan.");}
+ else {toast("Pembatalan tersedia hanya sampai halaman dimuat ulang. Ekspor cadangan sebelum perubahan besar.");}
+});
+$("exportBtn").addEventListener("click",()=>{
+ const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+ const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="domino-match-backup.json";a.click();URL.revokeObjectURL(url);toast("Cadangan JSON diekspor.");
+});
+$("clearBtn").addEventListener("click",()=>{
+ if(!confirm("Yakin reset semua data Domino Match di browser ini? Tindakan ini tidak bisa dibatalkan."))return;
+ state=fresh();undoSnapshot=null;persist();render();toast("Semua data sesi direset.");
+});
+render();
+})();
+</script>
+</body>
+</html>
