@@ -37,14 +37,19 @@ header{display:flex;justify-content:space-between;align-items:center;gap:14px;fl
   </section>
   <section class="panel">
     <div class="panel-head"><h2>🏁 Input hasil ronde</h2><span class="pill">Juara 1–4</span></div>
-    <p class="muted" style="font-size:13px;margin-top:-5px">Pilih nama pemain untuk setiap posisi juara. Setiap nama hanya boleh dipilih sekali. Setelah 2 ronde, pemain dengan poin terendah pada dua ronde itu diganti pemain dari antrean.</p>
+    <p class="muted" style="font-size:13px;margin-top:-5px">Satu match terdiri dari 2 ronde dengan empat pemain yang sama. Poin kedua ronde dijumlahkan; setelah ronde kedua, pemain terendah diganti pemain dari antrean.</p>
     <form id="resultForm" class="round-form">
       <div id="rankFields"></div>
       <div class="form-actions"><button class="primary" id="submitResult" type="submit">Simpan hasil & rotasi →</button><button type="button" class="subtle" id="resetRanks">Reset pilihan</button></div>
     </form>
   </section>
   <section class="panel">
-    <div class="panel-head"><h2>🏆 Klasemen poin</h2><span class="pill">Total sepanjang sesi</span></div>
+    <div class="panel-head"><h2>🏅 Klasemen match</h2><span class="pill" id="matchStandingsLabel">Match berjalan</span></div>
+    <div class="table-wrap"><table><thead><tr><th>#</th><th>Nama pemain</th><th>Poin match</th></tr></thead><tbody id="matchLeaderboard"></tbody></table></div>
+    <div class="empty" id="matchLeaderEmpty">Klasemen match muncul setelah ronde pertama.</div>
+  </section>
+  <section class="panel">
+    <div class="panel-head"><h2>🏆 Klasemen keseluruhan</h2><span class="pill">Total sepanjang sesi</span></div>
     <div class="table-wrap"><table><thead><tr><th>#</th><th>Nama pemain</th><th>Ronde</th><th>Poin</th></tr></thead><tbody id="leaderboard"></tbody></table></div>
     <div class="empty" id="leaderEmpty">Klasemen muncul setelah pemain ditambahkan.</div>
   </section>
@@ -76,7 +81,7 @@ header{display:flex;justify-content:space-between;align-items:center;gap:14px;fl
       <div class="queue-item"><div class="queue-no">3</div><div class="queue-name">Juara 3</div><strong>+2</strong></div>
       <div class="queue-item"><div class="queue-no" style="color:var(--red)">4</div><div class="queue-name">Juara 4</div><strong>+1</strong></div>
     </div>
-    <p class="muted" style="font-size:12px;margin-bottom:0">Pergantian dilakukan setiap 2 ronde berdasarkan total poin dalam dua ronde tersebut. Pemain dengan poin terendah masuk ke belakang antrean; pemain berikutnya dari antrean menggantikan posisinya.</p>
+    <p class="muted" style="font-size:12px;margin-bottom:0">Empat pemain menyelesaikan 2 ronde sebelum pergantian. Jumlah yang diganti mengikuti peserta menunggu: 5 peserta = 1 pemain, 6 = 2 pemain, 7 = 3 pemain. Pemain yang keluar masuk ke belakang antrean.</p>
   </section>
 </aside>
 </div>
@@ -90,7 +95,7 @@ const POINTS = [4,3,2,1];
 const $ = id => document.getElementById(id);
 let state = load();
 let undoSnapshot = null;
-function fresh(){return {sessionName:"",started:false,players:[],active:[],queue:[],rounds:[],nextId:1,nextQueueOrder:1,matchRoundCount:0,matchPoints:{}};}
+function fresh(){return {sessionName:"",started:false,players:[],active:[],queue:[],rounds:[],nextId:1,nextQueueOrder:1,matchRoundCount:0,matchNumber:1,matchPoints:{},lastMatch:null};}
 function load(){try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&Array.isArray(x.players)&&Array.isArray(x.active)&&Array.isArray(x.queue)&&Array.isArray(x.rounds))return x;}catch(e){}return fresh();}
 function persist(){localStorage.setItem(KEY,JSON.stringify(state));}
 function toast(msg){const el=$("toast");el.textContent=msg;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),2500);}
@@ -125,7 +130,7 @@ function render(){
  $("activePlayers").innerHTML=state.active.map((id,i)=>{const p=player(id);if(!p)return "";return `<div class="player"><div class="player-top"><div class="avatar">${escapeHtml(p.name.slice(0,1).toUpperCase())}</div><div><div class="player-name">${escapeHtml(p.name)}</div><div class="player-sub">Pemain meja · ${i+1}</div></div></div><div class="player-score"><div><div class="score">${p.points}</div><div class="pts">TOTAL POIN</div></div><div class="player-sub">${p.rounds} ronde</div></div></div>`}).join("");
  $("queueEmpty").style.display=state.queue.length?"none":"block";
  $("queueList").innerHTML=state.queue.map((id,i)=>{const p=player(id);if(!p)return "";return `<div class="queue-item"><div class="queue-no">${i+1}</div><div class="queue-name">${escapeHtml(p.name)}</div><button class="small-btn subtle" data-remove="${id}" title="Hapus dari sesi">×</button></div>`}).join("");
- $("rankFields").innerHTML=[1,2,3,4].map(rank=>`<div class="rank-row"><label class="rank-label" for="winner-${rank}">Juara ${rank}<br><span>+${POINTS[rank-1]} poin${rank===4?" · keluar":""}</span></label><select id="winner-${rank}" name="winner-${rank}" required><option value="">Pilih nama pemain…</option>${state.active.map(id=>{const p=player(id);return `<option value="${id}">${escapeHtml(p.name)}</option>`}).join("")}</select></div>`).join("");
+ $("rankFields").innerHTML=[1,2,3,4].map(rank=>`<div class="rank-row"><label class="rank-label" for="winner-${rank}">Juara ${rank}<br><span>+${POINTS[rank-1]} poin</span></label><select id="winner-${rank}" name="winner-${rank}" required><option value="">Pilih nama pemain…</option>${state.active.map(id=>{const p=player(id);return `<option value="${id}">${escapeHtml(p.name)}</option>`}).join("")}</select></div>`).join("");
  const ready=state.started&&state.active.length===4;
  $("submitResult").disabled=!ready;
  $("startBtn").disabled=state.started;
@@ -133,8 +138,16 @@ function render(){
  $("leaderEmpty").style.display=state.players.length?"none":"block";
  const sorted=[...state.players].sort((a,b)=>b.points-a.points||a.name.localeCompare(b.name));
  $("leaderboard").innerHTML=sorted.map((p,i)=>`<tr><td><span class="rank-number ${i===0?"winner":""}">${i+1}</span></td><td><strong>${escapeHtml(p.name)}</strong>${state.active.includes(p.id)?' <span style="color:var(--green);font-size:10px">● AKTIF</span>':""}</td><td>${p.rounds}</td><td><strong>${p.points}</strong></td></tr>`).join("");
+ const showCurrent=state.matchRoundCount>0;
+ const matchSource=showCurrent?{number:state.matchNumber||1,points:state.matchPoints||{},players:state.active}:state.lastMatch;
+ $("matchStandingsLabel").textContent=matchSource?`Match ${matchSource.number}${showCurrent?` · ronde ${state.matchRoundCount}/2`:" · terakhir"}`:"Match berjalan";
+ const matchPlayers=matchSource?(matchSource.players||[]).map(id=>player(id)).filter(Boolean):[];
+ matchPlayers.sort((a,b)=>(matchSource.points[a.id]||0)-(matchSource.points[b.id]||0));
+ matchPlayers.reverse();
+ $("matchLeaderboard").innerHTML=matchPlayers.map((p,i)=>`<tr><td><span class="rank-number ${i===0?"winner":""}">${i+1}</span></td><td><strong>${escapeHtml(p.name)}</strong></td><td><strong>${matchSource.points[p.id]||0}</strong></td></tr>`).join("");
+ $("matchLeaderEmpty").style.display=matchPlayers.length?"none":"block";
  $("historyEmpty").style.display=state.rounds.length?"none":"block";
- $("history").innerHTML=[...state.rounds].reverse().map(r=>`<div class="history-item"><div class="history-top"><span>Ronde #${r.number}</span><span class="muted" style="font-size:11px;font-weight:500">${escapeHtml(r.time)}</span></div><div class="history-detail">${r.results.map(x=>`${x.rank}. ${escapeHtml(x.name)} (+${x.points})`).join(" · ")}</div>${r.rotations?.length?`<div class="history-detail" style="margin-top:5px">Pergantian: ${r.rotations.map(x=>`${escapeHtml(x.outName)} keluar, ${escapeHtml(x.inName)} masuk`).join(" · ")}</div>`:`<div class="history-detail" style="margin-top:5px">Ronde ${r.matchRound||"—"}/2 menuju pergantian berikutnya</div>`}</div>`).join("");
+ $("history").innerHTML=[...state.rounds].reverse().map(r=>`<div class="history-item"><div class="history-top"><span>Match ${r.matchNumber||"—"} · Ronde ${r.matchRound||"—"}/2</span><span class="muted" style="font-size:11px;font-weight:500">${escapeHtml(r.time)}</span></div><div class="history-detail">${r.results.map(x=>`${x.rank}. ${escapeHtml(x.name)} (+${x.points})`).join(" · ")}</div>${r.rotations?.length?`<div class="history-detail" style="margin-top:5px">Pergantian: ${r.rotations.map(x=>`${escapeHtml(x.outName)} keluar, ${escapeHtml(x.inName)} masuk`).join(" · ")}</div>`:""}</div>`).join("");
  $("undoBtn").disabled=state.rounds.length===0;
 }
 $("addPlayerForm").addEventListener("submit",e=>{e.preventDefault();addPlayer($("playerName").value);});
@@ -167,7 +180,7 @@ $("resultForm").addEventListener("submit",e=>{
  state.matchRoundCount=(state.matchRoundCount||0)+1;
  state.matchPoints=state.matchPoints||{};
  results.forEach(r=>{state.matchPoints[r.id]=(state.matchPoints[r.id]||0)+r.points;});
- const round={number:state.rounds.length+1,time:new Date().toLocaleString("id-ID"),results:results.map(({rank,points,name,id})=>({rank,points,name,id})),matchRound:state.matchRoundCount,rotations:[]};
+ const round={number:state.rounds.length+1,time:new Date().toLocaleString("id-ID"),results:results.map(({rank,points,name,id})=>({rank,points,name,id})),matchNumber:state.matchNumber||1,matchRound:state.matchRoundCount,rotations:[]};
  if(state.matchRoundCount===2){
    const replacementCount=Math.min(state.queue.length,Math.max(0,state.players.length-4));
    const outgoing=[...state.active].sort((a,b)=>(state.matchPoints[a]??0)-(state.matchPoints[b]??0)||(player(a)?.name||"").localeCompare(player(b)?.name||"")).slice(0,replacementCount);
@@ -180,12 +193,14 @@ $("resultForm").addEventListener("submit",e=>{
      state.queue.push(outgoingId);
      round.rotations.push({outId:outgoingId,outName:out.name,inId:replacementId,inName:incoming.name});
    }
+   state.lastMatch={number:state.matchNumber||1,players:results.map(r=>r.id),points:{...state.matchPoints}};
    state.matchRoundCount=0;
+   state.matchNumber=(state.matchNumber||1)+1;
    state.matchPoints={};
  }
  state.rounds.push(round);
  persist();render();
- toast(round.rotations.length?`${round.rotations.length} pemain dengan poin terendah diganti.`:state.matchRoundCount===1?"Ronde tersimpan. Pergantian dilakukan setelah ronde berikutnya.":"Ronde tersimpan.");
+ toast(round.matchRound===1?`Ronde pertama Match ${round.matchNumber} tersimpan. Pemain yang sama lanjut ronde kedua.`:round.rotations.length?`Match ${round.matchNumber} selesai. ${round.rotations.length} pemain dengan poin match terendah diganti.`:`Match ${round.matchNumber} selesai. Belum ada pemain pengganti di antrean.`);
 });
 $("queueList").addEventListener("click",e=>{
  const btn=e.target.closest("[data-remove]");if(!btn)return;
