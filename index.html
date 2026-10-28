@@ -2,25 +2,74 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#111827">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Domino Match Manager</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&display=swap">
 <style>
-:root{--bg:#0b1020;--panel:#141c2f;--panel2:#1b2740;--line:#2a3854;--text:#f3f6fc;--muted:#9eacc4;--green:#4ade80;--gold:#fbbf24;--red:#fb7185;--blue:#7dd3fc}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#17243e 0,#0b1020 55%);color:var(--text);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
-button,input{font:inherit}button{cursor:pointer;border:1px solid var(--line);background:#25324b;color:var(--text);border-radius:12px;padding:10px 14px;font-weight:650}button:hover{filter:brightness(1.12)}button:disabled{opacity:.45;cursor:not-allowed}.primary{background:var(--green);color:#062412;border-color:transparent}.danger{background:#472331;color:#fecdd3;border-color:#743248}.subtle{background:transparent}.wrap{max-width:1180px;margin:auto;padding:22px 16px 48px}
-header{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:24px}.brand{display:flex;gap:12px;align-items:center}.logo{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,#4ade80,#7dd3fc);color:#081522;font-size:25px;font-weight:900}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:var(--green);font-weight:800}.title{font-size:clamp(25px,4vw,34px);font-weight:850;letter-spacing:-.04em;margin:0}.muted{color:var(--muted)}.status{border:1px solid #2d684a;background:#133324;color:#86efac;padding:7px 11px;border-radius:99px;font-size:12px;font-weight:800}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}.stat,.panel{background:rgba(20,28,47,.92);border:1px solid var(--line);border-radius:18px}.stat{padding:16px}.stat .num{font-size:27px;font-weight:850;letter-spacing:-.04em}.stat .label{color:var(--muted);font-size:12px}
-.layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,.85fr);gap:16px;align-items:start}.panel{padding:18px;margin-bottom:16px}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}.panel h2{font-size:17px;margin:0;font-weight:800}.pill{font-size:11px;padding:5px 9px;border:1px solid var(--line);border-radius:99px;color:var(--muted)}
-.players{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.player{background:linear-gradient(145deg,#1c2942,#131d31);border:1px solid #30405e;border-radius:16px;padding:14px;min-width:0}.player-top{display:flex;gap:10px;align-items:center}.avatar{width:40px;height:40px;border-radius:13px;background:#263a53;display:grid;place-items:center;color:var(--blue);font-weight:850;flex-shrink:0}.player-name{font-weight:800;overflow-wrap:anywhere}.player-sub{font-size:12px;color:var(--muted)}.player-score{display:flex;justify-content:space-between;align-items:end;margin-top:17px}.score{font-size:28px;font-weight:900;letter-spacing:-.05em}.pts{font-size:11px;color:var(--muted)}.round-form{display:grid;gap:12px}.rank-row{display:grid;grid-template-columns:78px minmax(0,1fr);align-items:center;gap:10px}.rank-label{font-size:13px;font-weight:800}.rank-label span{color:var(--green)}select,input{width:100%;min-width:0;background:#0d1526;color:var(--text);border:1px solid var(--line);border-radius:11px;padding:11px 12px;outline:none}select:focus,input:focus{border-color:var(--blue)}.form-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:4px}.queue-list{display:grid;gap:8px}.queue-item{display:flex;align-items:center;gap:10px;padding:10px;background:#10192b;border:1px solid #24334c;border-radius:12px}.queue-no{width:28px;height:28px;border-radius:9px;background:#25324b;display:grid;place-items:center;color:var(--blue);font-weight:850;font-size:12px}.queue-name{flex:1;font-weight:700;overflow-wrap:anywhere}.empty{padding:18px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:13px;font-size:13px}.inline-form{display:flex;gap:8px;margin-top:12px}.inline-form input{flex:1}.inline-form button{white-space:nowrap}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:420px}th,td{text-align:left;padding:11px 9px;border-bottom:1px solid #26344d;font-size:13px}th{color:var(--muted);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.06em}td:last-child,th:last-child{text-align:right}.rank-number{display:inline-grid;place-items:center;width:25px;height:25px;border-radius:8px;background:#26344d;font-weight:800}.winner{color:var(--gold)}.history-list{display:grid;gap:9px}.history-item{border:1px solid var(--line);border-radius:13px;padding:12px;background:#10192b}.history-top{display:flex;justify-content:space-between;gap:10px;margin-bottom:6px;font-weight:800}.history-detail{color:var(--muted);font-size:12px;overflow-wrap:anywhere}.small-btn{padding:6px 9px;font-size:12px}.footer-note{color:var(--muted);font-size:12px;text-align:center;margin-top:16px}.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);padding:11px 16px;background:#e2e8f0;color:#0b1020;border-radius:12px;box-shadow:0 8px 40px #0007;display:none;z-index:5;max-width:90vw}.toast.show{display:block}.section-gap{margin-top:16px}
-@media(max-width:780px){.layout{grid-template-columns:1fr}.stats{gap:8px}.stat{padding:12px}.stat .num{font-size:23px}.panel{padding:14px}.wrap{padding:17px 12px 36px}}
-@media(max-width:420px){.players{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,minmax(0,1fr))}.stat .label{font-size:10px}.stat .num{font-size:20px}.inline-form{flex-wrap:wrap}.inline-form button{width:100%}.rank-row{grid-template-columns:70px minmax(0,1fr)}}
+:root{--bg:#f2ecdf;--panel:#fffdf7;--panel2:#f6f0e2;--line:#e0d6c0;--text:#1d2a22;--muted:#6b766e;--green:#15803d;--gold:#a16207;--red:#c2410c;--blue:#0e7490;--felt1:#0f4c32;--felt2:#0a3322;--on-accent:#fff;--shadow:0 8px 24px -14px #3b2f1a66;--hf:"Bricolage Grotesque",system-ui,sans-serif;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1410;--panel:#12201a;--panel2:#172a21;--line:#243a2f;--text:#eef3ec;--muted:#8fa296;--green:#4ade80;--gold:#fbbf24;--red:#fb7185;--blue:#7dd3fc;--felt1:#145a3b;--felt2:#0b3524;--on-accent:#052e16;--shadow:0 8px 24px -14px #000c;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0b1410;--panel:#12201a;--panel2:#172a21;--line:#243a2f;--text:#eef3ec;--muted:#8fa296;--green:#4ade80;--gold:#fbbf24;--red:#fb7185;--blue:#7dd3fc;--felt1:#145a3b;--felt2:#0b3524;--on-accent:#052e16;--shadow:0 8px 24px -14px #000c;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+button,input,select{font:inherit}button{cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:10px 15px;font-weight:650;transition:transform .1s,filter .15s}button:hover{filter:brightness(.96)}button:active{transform:translateY(1px)}button:disabled{opacity:.45;cursor:not-allowed}
+.primary{background:var(--green);color:var(--on-accent);border-color:transparent}.danger{background:transparent;color:var(--red);border-color:var(--red)}.subtle{background:transparent}
+.wrap{max-width:1180px;margin:auto;padding:18px 16px 48px}
+header{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px;padding:20px 24px;border-radius:24px;background:radial-gradient(circle at 85% 0,#ffffff1a,transparent 45%),linear-gradient(135deg,var(--felt1),var(--felt2));color:#f6f1e2;box-shadow:var(--shadow)}
+.brand{display:flex;gap:16px;align-items:center}
+.logo{width:40px;height:56px;border-radius:9px;background:#fffdf3;position:relative;flex-shrink:0;transform:rotate(-8deg);box-shadow:0 4px 0 #cfc5aa,0 8px 14px #0006}
+.logo::before{content:"";position:absolute;left:6px;right:6px;top:27px;height:2px;background:#cdc3a8}
+.logo::after{content:"";position:absolute;left:18px;top:11px;width:7px;height:7px;border-radius:50%;background:#1c1917;box-shadow:-7px 27px 0 #1c1917,7px 37px 0 #1c1917}
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.18em;color:#86efac;font-weight:800}
+.title{font:800 clamp(26px,4.5vw,38px)/1.05 var(--hf);letter-spacing:-.03em;margin:2px 0 4px;color:#fbf7ec}
+header .muted{color:#b9d4c4}.muted{color:var(--muted)}
+.status{border:1px solid #ffffff40;background:#ffffff14;color:#d9f99d;padding:7px 13px;border-radius:99px;font-size:12px;font-weight:800;letter-spacing:.04em}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+.stat,.panel{background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}
+.stat{padding:15px 18px;border-left:5px solid var(--green)}.stat .num{font:800 30px/1.1 var(--hf);letter-spacing:-.03em}.stat .label{color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.08em}
+.layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(290px,.85fr);gap:16px;align-items:start}
+.panel{padding:20px;margin-bottom:16px}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}
+.panel h2{font:700 18px/1.2 var(--hf);margin:0;display:flex;align-items:center;gap:9px;letter-spacing:-.01em}
+.panel h2::before{content:"";width:9px;height:9px;background:var(--green);transform:rotate(45deg);border-radius:2px;flex-shrink:0}
+.pill{font-size:11px;padding:5px 10px;border:1px solid var(--line);background:var(--panel2);border-radius:99px;color:var(--muted);font-weight:650}
+.players{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.player{background:var(--panel2);border:1px solid var(--line);border-radius:18px;padding:14px 15px;min-width:0;position:relative;overflow:hidden}
+.player::after{content:"";position:absolute;right:-18px;top:-18px;width:56px;height:56px;border-radius:50%;background:var(--green);opacity:.08}
+.player-top{display:flex;gap:11px;align-items:center}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--felt1);color:#f6f1e2;display:grid;place-items:center;font:800 18px var(--hf);flex-shrink:0;box-shadow:0 0 0 3px var(--panel),0 0 0 4px var(--line)}
+.player-name{font-weight:800;overflow-wrap:anywhere}.player-sub{font-size:12px;color:var(--muted)}
+.player-score{display:flex;justify-content:space-between;align-items:end;margin-top:14px;padding-top:12px;border-top:2px dashed var(--line)}
+.score{font:800 34px/1 var(--hf);letter-spacing:-.04em}.pts{font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.08em;margin-top:3px}
+.round-form{display:grid;gap:12px}#rankFields{display:grid;gap:10px}
+.rank-row{display:grid;grid-template-columns:92px minmax(0,1fr);align-items:center;gap:12px}
+.rank-label{font-size:13px;font-weight:800;line-height:1.25;padding:6px 10px;border-radius:10px;background:var(--panel2);border-left:5px solid var(--muted)}
+.rank-label span{color:var(--muted);font-weight:700;font-size:11px}
+.rank-row:nth-child(1) .rank-label{border-left-color:#d4a017}.rank-row:nth-child(2) .rank-label{border-left-color:#94a3b8}.rank-row:nth-child(3) .rank-label{border-left-color:#b4764a}.rank-row:nth-child(4) .rank-label{border-left-color:var(--red)}
+select,input{width:100%;min-width:0;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:11px 12px;outline:none}
+select:focus,input:focus{border-color:var(--green);box-shadow:0 0 0 3px color-mix(in srgb,var(--green) 22%,transparent)}
+.form-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:4px}
+.queue-list{display:grid;gap:8px}.queue-item{display:flex;align-items:center;gap:11px;padding:9px 11px;background:var(--panel2);border:1px solid var(--line);border-radius:14px}
+.queue-no{width:28px;height:28px;border-radius:50%;background:var(--panel);border:1px solid var(--line);display:grid;place-items:center;color:var(--blue);font-weight:800;font-size:12px}
+.queue-name{flex:1;font-weight:700;overflow-wrap:anywhere}
+.empty{padding:18px;text-align:center;color:var(--muted);border:2px dashed var(--line);border-radius:14px;font-size:13px}
+.inline-form{display:flex;gap:8px;margin-top:12px}.inline-form input{flex:1}.inline-form button{white-space:nowrap}
+.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:420px}
+th,td{text-align:left;padding:11px 9px;border-bottom:1px solid var(--line);font-size:13px}th{color:var(--muted);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.08em}td:last-child,th:last-child{text-align:right}
+tbody tr:last-child td{border-bottom:0}td strong{font-family:var(--hf);font-size:15px}
+.rank-number{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);font-weight:800;font-size:12px}
+.rank-number.winner{background:var(--gold);border-color:transparent;color:#fff}.winner{color:var(--gold)}
+.history-list{display:grid;gap:9px}.history-item{border:1px solid var(--line);border-left:5px solid var(--green);border-radius:14px;padding:12px 14px;background:var(--panel2)}
+.history-top{display:flex;justify-content:space-between;gap:10px;margin-bottom:6px;font-weight:800}.history-detail{color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+.small-btn{padding:6px 10px;font-size:12px}.footer-note{color:var(--muted);font-size:12px;text-align:center;margin-top:16px}
+.toast{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);padding:12px 18px;background:var(--text);color:var(--bg);border-radius:14px;box-shadow:0 10px 40px #0006;display:none;z-index:5;max-width:90vw;font-weight:600}.toast.show{display:block}
+.section-gap{margin-top:16px}
+@media(max-width:780px){.layout{grid-template-columns:1fr}.stats{gap:8px}.stat{padding:12px}.stat .num{font-size:24px}.panel{padding:15px}.wrap{padding:12px 12px 36px}header{padding:16px}}
+@media(max-width:420px){.players{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,minmax(0,1fr))}.stat .label{font-size:9px}.stat .num{font-size:20px}.inline-form{flex-wrap:wrap}.inline-form button{width:100%}.rank-row{grid-template-columns:82px minmax(0,1fr)}}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
-  <div class="brand"><div class="logo">D</div><div><div class="eyebrow">Table & Score Manager</div><h1 class="title">Domino Match</h1><div class="muted" style="font-size:13px">Kelola meja, antrean, dan poin dalam satu tempat.</div></div></div>
+  <div class="brand"><div class="logo"></div><div><div class="eyebrow">Table &amp; Score Manager</div><h1 class="title">Domino Match</h1><div class="muted" style="font-size:13px">Kelola meja, antrean, dan poin dalam satu tempat.</div></div></div>
   <div class="status" id="statusBadge">● SIAP DIMULAI</div>
 </header>
 <section class="stats">
@@ -31,50 +80,50 @@ header{display:flex;justify-content:space-between;align-items:center;gap:14px;fl
 <div class="layout">
 <main>
   <section class="panel">
-    <div class="panel-head"><h2>♟ Sedang bermain</h2><span class="pill" id="tablePill">Meja 1 · 0/4 pemain</span></div>
+    <div class="panel-head"><h2>Sedang bermain</h2><span class="pill" id="tablePill">Meja 1 · 0/4 pemain</span></div>
     <div class="players" id="activePlayers"></div>
     <div class="empty" id="activeEmpty">Tambahkan minimal 4 pemain untuk memulai.</div>
   </section>
   <section class="panel">
-    <div class="panel-head"><h2>🏁 Input hasil ronde</h2><span class="pill">Juara 1–4</span></div>
+    <div class="panel-head"><h2>Input hasil ronde</h2><span class="pill">Juara 1–4</span></div>
     <p class="muted" style="font-size:13px;margin-top:-5px">Satu match terdiri dari 2 ronde dengan empat pemain yang sama. Poin kedua ronde dijumlahkan; setelah ronde kedua, pemain terendah diganti pemain dari antrean.</p>
     <form id="resultForm" class="round-form">
       <div id="rankFields"></div>
-      <div class="form-actions"><button class="primary" id="submitResult" type="submit">Simpan hasil & rotasi →</button><button type="button" class="subtle" id="resetRanks">Reset pilihan</button></div>
+      <div class="form-actions"><button class="primary" id="submitResult" type="submit">Simpan hasil &amp; rotasi →</button><button type="button" class="subtle" id="resetRanks">Reset pilihan</button></div>
     </form>
   </section>
   <section class="panel">
-    <div class="panel-head"><h2>🏅 Klasemen match</h2><span class="pill" id="matchStandingsLabel">Match berjalan</span></div>
+    <div class="panel-head"><h2>Klasemen match</h2><span class="pill" id="matchStandingsLabel">Match berjalan</span></div>
     <div class="table-wrap"><table><thead><tr><th>#</th><th>Nama pemain</th><th>Poin match</th></tr></thead><tbody id="matchLeaderboard"></tbody></table></div>
     <div class="empty" id="matchLeaderEmpty">Klasemen match muncul setelah ronde pertama.</div>
   </section>
   <section class="panel">
-    <div class="panel-head"><h2>🏆 Klasemen keseluruhan</h2><span class="pill">Total sepanjang sesi</span></div>
+    <div class="panel-head"><h2>Klasemen keseluruhan</h2><span class="pill">Total sepanjang sesi</span></div>
     <div class="table-wrap"><table><thead><tr><th>#</th><th>Nama pemain</th><th>Ronde</th><th>Poin</th></tr></thead><tbody id="leaderboard"></tbody></table></div>
     <div class="empty" id="leaderEmpty">Klasemen muncul setelah pemain ditambahkan.</div>
   </section>
   <section class="panel">
-    <div class="panel-head"><h2>🕘 Riwayat ronde</h2><button class="small-btn subtle" id="undoBtn" disabled>Batalkan ronde terakhir</button></div>
+    <div class="panel-head"><h2>Riwayat ronde</h2><button class="small-btn subtle" id="undoBtn" disabled>Batalkan ronde terakhir</button></div>
     <div class="history-list" id="history"></div>
     <div class="empty" id="historyEmpty">Belum ada ronde yang disimpan.</div>
   </section>
 </main>
 <aside>
   <section class="panel">
-    <div class="panel-head"><h2>⏳ Antrean pemain</h2><span class="pill" id="queuePill">0 menunggu</span></div>
+    <div class="panel-head"><h2>Antrean pemain</h2><span class="pill" id="queuePill">0 menunggu</span></div>
     <div class="queue-list" id="queueList"></div>
     <div class="empty" id="queueEmpty">Belum ada pemain menunggu.</div>
     <form class="inline-form" id="addPlayerForm"><input id="playerName" maxlength="32" placeholder="Nama pemain baru" autocomplete="off" required><button class="primary" type="submit">+ Tambah</button></form>
   </section>
   <section class="panel">
-    <div class="panel-head"><h2>⚙️ Pengaturan sesi</h2></div>
+    <div class="panel-head"><h2>Pengaturan sesi</h2></div>
     <label class="muted" for="sessionName" style="display:block;font-size:12px;margin-bottom:6px">Nama sesi (opsional)</label>
     <input id="sessionName" maxlength="50" placeholder="Contoh: Domino malam Jumat">
     <div class="form-actions section-gap"><button id="startBtn" class="primary">Mulai sesi</button><button id="exportBtn">Ekspor JSON</button><button id="clearBtn" class="danger">Reset semua data</button></div>
     <p class="muted" style="font-size:12px;margin-bottom:0">Data tersimpan di browser perangkat ini. Ekspor JSON untuk membuat cadangan. Reset menghapus sesi lokal setelah konfirmasi.</p>
   </section>
   <section class="panel">
-    <div class="panel-head"><h2>📋 Aturan poin</h2></div>
+    <div class="panel-head"><h2>Aturan poin</h2></div>
     <div class="queue-list">
       <div class="queue-item"><div class="queue-no winner">1</div><div class="queue-name">Juara 1</div><strong>+4</strong></div>
       <div class="queue-item"><div class="queue-no">2</div><div class="queue-name">Juara 2</div><strong>+3</strong></div>
@@ -97,7 +146,7 @@ let state = load();
 let undoSnapshot = null;
 function fresh(){return {sessionName:"",started:false,players:[],active:[],queue:[],rounds:[],nextId:1,nextQueueOrder:1,matchRoundCount:0,matchNumber:1,matchPoints:{},lastMatch:null};}
 function load(){try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&Array.isArray(x.players)&&Array.isArray(x.active)&&Array.isArray(x.queue)&&Array.isArray(x.rounds))return x;}catch(e){}return fresh();}
-function persist(){localStorage.setItem(KEY,JSON.stringify(state));}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
 function toast(msg){const el=$("toast");el.textContent=msg;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),2500);}
 function player(id){return state.players.find(p=>p.id===id);}
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
