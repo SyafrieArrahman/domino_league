@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#111827">
+<meta name="theme-color" content="#f4f6f3">
 <title>Domino Match Manager</title>
 <link rel="stylesheet" href="style.css">
 <script src="script.js" defer></script>
@@ -14,6 +14,7 @@
   <a class="brand" href="#" aria-label="Domino Match Manager"><div class="logo">D</div><div><div class="eyebrow">Table & Score Manager</div><h1 class="title">Domino Match</h1></div></a>
   <div class="header-actions">
     <div class="status" id="statusBadge">● SIAP DIMULAI</div>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Ganti ke mode gelap">☾ <span>Gelap</span></button>
     <details class="header-dropdown">
       <summary>Menu ▾</summary>
       <div class="dropdown-content">
@@ -24,7 +25,7 @@
             <div><span>Juara 1</span><strong>+4 atau +5 poin</strong></div>
             <div><span>Juara 2</span><strong>+3 poin</strong></div>
             <div><span>Juara 3</span><strong>+2 poin</strong></div>
-            <div><span>Juara 4</span><strong>+1 atau -2 poin</strong></div>
+            <div><span>Juara 4</span><strong>+1 atau -1 poin</strong></div>
           </div>
           <p>Jumlah pergantian mengikuti peserta: 5 orang = 1 pemain, 6 orang = 2 pemain, 7 orang = 3 pemain. Pemain yang keluar masuk ke belakang antrean.</p>
         </details>
@@ -54,6 +55,12 @@
       <div class="form-actions"><button class="primary" id="submitResult" type="submit" disabled>Simpan hasil ronde →</button><button type="button" class="subtle" id="resetRanks">Reset pilihan</button></div>
     </form>
   </section>
+  <section class="panel battle-arena" id="battleArena" hidden>
+    <div class="panel-head"><div><div class="eyebrow battle-eyebrow">Domino showdown</div><h2>⚔️ Battle Arena</h2></div><span class="pill" id="battleBadge">Tie-break</span></div>
+    <p class="muted battle-message" id="battleMessage"></p>
+    <div class="battle-cards" id="battleCards" aria-live="polite"></div>
+    <div class="form-actions" id="battleActions"><button class="primary" id="openArenaBtn" type="button">Masuk Battle Arena →</button></div>
+  </section>
   <section class="panel">
     <div class="panel-head standings-head"><h2>🏆 Klasemen</h2><span class="pill" id="matchStandingsLabel">Match berjalan</span></div>
     <div class="standings-tabs" role="tablist" aria-label="Jenis klasemen">
@@ -69,7 +76,7 @@
     <div class="panel-head"><h2>⏳ Antrean pemain</h2><span class="pill" id="queuePill">0 menunggu</span></div>
     <div class="queue-list" id="queueList"></div>
     <div class="empty" id="queueEmpty">Belum ada pemain menunggu.</div>
-    <form class="inline-form" id="addPlayerForm"><input id="playerName" maxlength="32" placeholder="Nama pemain baru" autocomplete="off" required><button class="primary" type="submit">+ Tambah</button></form>
+    <form class="inline-form" id="addPlayerForm"><input id="playerName" maxlength="32" placeholder="Nama pemain baru" autocomplete="off"><button class="primary" type="submit">+ Tambah</button></form>
   </section>
   <section class="panel">
     <div class="panel-head"><h2>⚙️ Pengaturan sesi</h2></div>
@@ -82,6 +89,28 @@
 </div>
 <div class="footer-note">Domino Match Manager · Penyimpanan lokal browser · Tidak perlu akun</div>
 </div>
-<div class="toast" id="toast"></div>
+<div class="arena-overlay" id="arenaOverlay" hidden>
+  <section class="arena-window" role="dialog" aria-modal="true" aria-labelledby="arenaTitle" aria-describedby="arenaInstruction">
+    <div class="arena-topbar"><div><span class="arena-live-dot"></span><span id="arenaMatchLabel">BATTLE ARENA</span></div><button class="arena-close" id="closeArena" type="button" aria-label="Tutup arena">×</button></div>
+    <div class="arena-content">
+      <div class="arena-intro"><div class="arena-kicker">FINAL DRAW</div><h2 id="arenaTitle">Penentuan juara</h2><p id="arenaInstruction"></p></div>
+      <div class="arena-duelists" id="arenaDuelists"></div>
+      <div class="arena-deck-wrap" id="arenaDeckWrap"><div class="arena-deck-head"><span>PILIH KARTU DOMINO</span><span class="arena-deck-count" id="arenaDeckCount"></span></div><div class="arena-deck" id="arenaDeck"></div></div>
+      <div class="arena-reveal" id="arenaReveal" hidden></div>
+      <div class="arena-actions" id="arenaActions"></div>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"><span class="toast-icon" id="toastIcon" aria-hidden="true">✓</span><span id="toastMessage"></span></div>
+<div class="dialog-layer" id="dialogLayer" hidden>
+  <section class="confirm-dialog" id="confirmDialog" role="alertdialog" aria-modal="true" aria-labelledby="dialogTitle" aria-describedby="dialogMessage" tabindex="-1">
+    <button class="dialog-close" id="dialogClose" type="button" aria-label="Tutup">×</button>
+    <div class="dialog-icon" id="dialogIcon" aria-hidden="true">!</div>
+    <div class="dialog-kicker" id="dialogKicker">Konfirmasi</div>
+    <h2 id="dialogTitle">Yakin?</h2>
+    <p id="dialogMessage"></p>
+    <div class="dialog-actions"><button id="dialogCancel" type="button">Kembali</button><button id="dialogConfirm" type="button" class="dialog-confirm">Lanjutkan</button></div>
+  </section>
+</div>
 </body>
 </html>
