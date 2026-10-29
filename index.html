@@ -3,74 +3,40 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111827">
 <title>Domino Match Manager</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&display=swap">
-<style>
-:root{--bg:#f2ecdf;--panel:#fffdf7;--panel2:#f6f0e2;--line:#e0d6c0;--text:#1d2a22;--muted:#6b766e;--green:#15803d;--gold:#a16207;--red:#c2410c;--blue:#0e7490;--felt1:#0f4c32;--felt2:#0a3322;--on-accent:#fff;--shadow:0 8px 24px -14px #3b2f1a66;--hf:"Bricolage Grotesque",system-ui,sans-serif;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1410;--panel:#12201a;--panel2:#172a21;--line:#243a2f;--text:#eef3ec;--muted:#8fa296;--green:#4ade80;--gold:#fbbf24;--red:#fb7185;--blue:#7dd3fc;--felt1:#145a3b;--felt2:#0b3524;--on-accent:#052e16;--shadow:0 8px 24px -14px #000c;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#0b1410;--panel:#12201a;--panel2:#172a21;--line:#243a2f;--text:#eef3ec;--muted:#8fa296;--green:#4ade80;--gold:#fbbf24;--red:#fb7185;--blue:#7dd3fc;--felt1:#145a3b;--felt2:#0b3524;--on-accent:#052e16;--shadow:0 8px 24px -14px #000c;color-scheme:dark}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
-button,input,select{font:inherit}button{cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:10px 15px;font-weight:650;transition:transform .1s,filter .15s}button:hover{filter:brightness(.96)}button:active{transform:translateY(1px)}button:disabled{opacity:.45;cursor:not-allowed}
-.primary{background:var(--green);color:var(--on-accent);border-color:transparent}.danger{background:transparent;color:var(--red);border-color:var(--red)}.subtle{background:transparent}
-.wrap{max-width:1180px;margin:auto;padding:18px 16px 48px}
-header{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px;padding:20px 24px;border-radius:24px;background:radial-gradient(circle at 85% 0,#ffffff1a,transparent 45%),linear-gradient(135deg,var(--felt1),var(--felt2));color:#f6f1e2;box-shadow:var(--shadow)}
-.brand{display:flex;gap:16px;align-items:center}
-.logo{width:40px;height:56px;border-radius:9px;background:#fffdf3;position:relative;flex-shrink:0;transform:rotate(-8deg);box-shadow:0 4px 0 #cfc5aa,0 8px 14px #0006}
-.logo::before{content:"";position:absolute;left:6px;right:6px;top:27px;height:2px;background:#cdc3a8}
-.logo::after{content:"";position:absolute;left:18px;top:11px;width:7px;height:7px;border-radius:50%;background:#1c1917;box-shadow:-7px 27px 0 #1c1917,7px 37px 0 #1c1917}
-.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.18em;color:#86efac;font-weight:800}
-.title{font:800 clamp(26px,4.5vw,38px)/1.05 var(--hf);letter-spacing:-.03em;margin:2px 0 4px;color:#fbf7ec}
-header .muted{color:#b9d4c4}.muted{color:var(--muted)}
-.status{border:1px solid #ffffff40;background:#ffffff14;color:#d9f99d;padding:7px 13px;border-radius:99px;font-size:12px;font-weight:800;letter-spacing:.04em}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
-.stat,.panel{background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}
-.stat{padding:15px 18px;border-left:5px solid var(--green)}.stat .num{font:800 30px/1.1 var(--hf);letter-spacing:-.03em}.stat .label{color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.08em}
-.layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(290px,.85fr);gap:16px;align-items:start}
-.panel{padding:20px;margin-bottom:16px}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}
-.panel h2{font:700 18px/1.2 var(--hf);margin:0;display:flex;align-items:center;gap:9px;letter-spacing:-.01em}
-.panel h2::before{content:"";width:9px;height:9px;background:var(--green);transform:rotate(45deg);border-radius:2px;flex-shrink:0}
-.pill{font-size:11px;padding:5px 10px;border:1px solid var(--line);background:var(--panel2);border-radius:99px;color:var(--muted);font-weight:650}
-.players{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.player{background:var(--panel2);border:1px solid var(--line);border-radius:18px;padding:14px 15px;min-width:0;position:relative;overflow:hidden}
-.player::after{content:"";position:absolute;right:-18px;top:-18px;width:56px;height:56px;border-radius:50%;background:var(--green);opacity:.08}
-.player-top{display:flex;gap:11px;align-items:center}
-.avatar{width:42px;height:42px;border-radius:50%;background:var(--felt1);color:#f6f1e2;display:grid;place-items:center;font:800 18px var(--hf);flex-shrink:0;box-shadow:0 0 0 3px var(--panel),0 0 0 4px var(--line)}
-.player-name{font-weight:800;overflow-wrap:anywhere}.player-sub{font-size:12px;color:var(--muted)}
-.player-score{display:flex;justify-content:space-between;align-items:end;margin-top:14px;padding-top:12px;border-top:2px dashed var(--line)}
-.score{font:800 34px/1 var(--hf);letter-spacing:-.04em}.pts{font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.08em;margin-top:3px}
-.round-form{display:grid;gap:12px}#rankFields{display:grid;gap:10px}
-.rank-row{display:grid;grid-template-columns:92px minmax(0,1fr);align-items:center;gap:12px}
-.rank-label{font-size:13px;font-weight:800;line-height:1.25;padding:6px 10px;border-radius:10px;background:var(--panel2);border-left:5px solid var(--muted)}
-.rank-label span{color:var(--muted);font-weight:700;font-size:11px}
-.rank-row:nth-child(1) .rank-label{border-left-color:#d4a017}.rank-row:nth-child(2) .rank-label{border-left-color:#94a3b8}.rank-row:nth-child(3) .rank-label{border-left-color:#b4764a}.rank-row:nth-child(4) .rank-label{border-left-color:var(--red)}
-select,input{width:100%;min-width:0;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:11px 12px;outline:none}
-select:focus,input:focus{border-color:var(--green);box-shadow:0 0 0 3px color-mix(in srgb,var(--green) 22%,transparent)}
-.form-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:4px}
-.queue-list{display:grid;gap:8px}.queue-item{display:flex;align-items:center;gap:11px;padding:9px 11px;background:var(--panel2);border:1px solid var(--line);border-radius:14px}
-.queue-no{width:28px;height:28px;border-radius:50%;background:var(--panel);border:1px solid var(--line);display:grid;place-items:center;color:var(--blue);font-weight:800;font-size:12px}
-.queue-name{flex:1;font-weight:700;overflow-wrap:anywhere}
-.empty{padding:18px;text-align:center;color:var(--muted);border:2px dashed var(--line);border-radius:14px;font-size:13px}
-.inline-form{display:flex;gap:8px;margin-top:12px}.inline-form input{flex:1}.inline-form button{white-space:nowrap}
-.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:420px}
-th,td{text-align:left;padding:11px 9px;border-bottom:1px solid var(--line);font-size:13px}th{color:var(--muted);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.08em}td:last-child,th:last-child{text-align:right}
-tbody tr:last-child td{border-bottom:0}td strong{font-family:var(--hf);font-size:15px}
-.rank-number{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);font-weight:800;font-size:12px}
-.rank-number.winner{background:var(--gold);border-color:transparent;color:#fff}.winner{color:var(--gold)}
-.history-list{display:grid;gap:9px}.history-item{border:1px solid var(--line);border-left:5px solid var(--green);border-radius:14px;padding:12px 14px;background:var(--panel2)}
-.history-top{display:flex;justify-content:space-between;gap:10px;margin-bottom:6px;font-weight:800}.history-detail{color:var(--muted);font-size:12px;overflow-wrap:anywhere}
-.small-btn{padding:6px 10px;font-size:12px}.footer-note{color:var(--muted);font-size:12px;text-align:center;margin-top:16px}
-.toast{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);padding:12px 18px;background:var(--text);color:var(--bg);border-radius:14px;box-shadow:0 10px 40px #0006;display:none;z-index:5;max-width:90vw;font-weight:600}.toast.show{display:block}
-.section-gap{margin-top:16px}
-@media(max-width:780px){.layout{grid-template-columns:1fr}.stats{gap:8px}.stat{padding:12px}.stat .num{font-size:24px}.panel{padding:15px}.wrap{padding:12px 12px 36px}header{padding:16px}}
-@media(max-width:420px){.players{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,minmax(0,1fr))}.stat .label{font-size:9px}.stat .num{font-size:20px}.inline-form{flex-wrap:wrap}.inline-form button{width:100%}.rank-row{grid-template-columns:82px minmax(0,1fr)}}
-</style>
+<link rel="stylesheet" href="style.css">
+<script src="script.js" defer></script>
 </head>
 <body>
 <div class="wrap">
 <header>
-  <div class="brand"><div class="logo"></div><div><div class="eyebrow">Table &amp; Score Manager</div><h1 class="title">Domino Match</h1><div class="muted" style="font-size:13px">Kelola meja, antrean, dan poin dalam satu tempat.</div></div></div>
-  <div class="status" id="statusBadge">● SIAP DIMULAI</div>
+  <a class="brand" href="#" aria-label="Domino Match Manager"><div class="logo">D</div><div><div class="eyebrow">Table & Score Manager</div><h1 class="title">Domino Match</h1></div></a>
+  <div class="header-actions">
+    <div class="status" id="statusBadge">● SIAP DIMULAI</div>
+    <details class="header-dropdown">
+      <summary>Menu ▾</summary>
+      <div class="dropdown-content">
+        <details class="dropdown-section">
+          <summary>Aturan main</summary>
+          <p>Empat pemain yang sama memainkan dua ronde dalam satu match. Poin kedua ronde dijumlahkan; pemain dengan poin match terendah diganti pemain yang menunggu.</p>
+          <div class="rule-list">
+            <div><span>Juara 1</span><strong>+4 atau +5 poin</strong></div>
+            <div><span>Juara 2</span><strong>+3 poin</strong></div>
+            <div><span>Juara 3</span><strong>+2 poin</strong></div>
+            <div><span>Juara 4</span><strong>+1 atau -2 poin</strong></div>
+          </div>
+          <p>Jumlah pergantian mengikuti peserta: 5 orang = 1 pemain, 6 orang = 2 pemain, 7 orang = 3 pemain. Pemain yang keluar masuk ke belakang antrean.</p>
+        </details>
+        <details class="dropdown-section">
+          <summary>Riwayat match</summary>
+          <div class="history-head"><span class="muted">Catatan semua ronde</span><button class="small-btn subtle" id="undoBtn" disabled>Batalkan ronde terakhir</button></div>
+          <div class="history-list" id="history"></div>
+          <div class="empty" id="historyEmpty">Belum ada ronde yang disimpan.</div>
+        </details>
+      </div>
+    </details>
+  </div>
 </header>
 <section class="stats">
   <div class="stat"><div class="label">PEMAIN TERDAFTAR</div><div class="num" id="statPlayers">0</div></div>
@@ -80,200 +46,42 @@ tbody tr:last-child td{border-bottom:0}td strong{font-family:var(--hf);font-size
 <div class="layout">
 <main>
   <section class="panel">
-    <div class="panel-head"><h2>Sedang bermain</h2><span class="pill" id="tablePill">Meja 1 · 0/4 pemain</span></div>
-    <div class="players" id="activePlayers"></div>
-    <div class="empty" id="activeEmpty">Tambahkan minimal 4 pemain untuk memulai.</div>
-  </section>
-  <section class="panel">
-    <div class="panel-head"><h2>Input hasil ronde</h2><span class="pill">Juara 1–4</span></div>
-    <p class="muted" style="font-size:13px;margin-top:-5px">Satu match terdiri dari 2 ronde dengan empat pemain yang sama. Poin kedua ronde dijumlahkan; setelah ronde kedua, pemain terendah diganti pemain dari antrean.</p>
-    <form id="resultForm" class="round-form">
-      <div id="rankFields"></div>
-      <div class="form-actions"><button class="primary" id="submitResult" type="submit">Simpan hasil &amp; rotasi →</button><button type="button" class="subtle" id="resetRanks">Reset pilihan</button></div>
+    <div class="panel-head"><h2>♟ Sedang bermain</h2><span class="pill" id="tablePill">Meja 1 · 0/4 pemain</span></div>
+    <p class="muted match-instructions" id="roundInstructions">Pilih peringkat di setiap kartu pemain. Setiap ronde harus memiliki juara 1 sampai 4 masing-masing satu.</p>
+    <form id="resultForm">
+      <div class="players" id="activePlayers"></div>
+      <div class="empty" id="activeEmpty">Tambahkan minimal 4 pemain untuk memulai.</div>
+      <div class="form-actions"><button class="primary" id="submitResult" type="submit" disabled>Simpan hasil ronde →</button><button type="button" class="subtle" id="resetRanks">Reset pilihan</button></div>
     </form>
   </section>
   <section class="panel">
-    <div class="panel-head"><h2>Klasemen match</h2><span class="pill" id="matchStandingsLabel">Match berjalan</span></div>
-    <div class="table-wrap"><table><thead><tr><th>#</th><th>Nama pemain</th><th>Poin match</th></tr></thead><tbody id="matchLeaderboard"></tbody></table></div>
-    <div class="empty" id="matchLeaderEmpty">Klasemen match muncul setelah ronde pertama.</div>
-  </section>
-  <section class="panel">
-    <div class="panel-head"><h2>Klasemen keseluruhan</h2><span class="pill">Total sepanjang sesi</span></div>
-    <div class="table-wrap"><table><thead><tr><th>#</th><th>Nama pemain</th><th>Ronde</th><th>Poin</th></tr></thead><tbody id="leaderboard"></tbody></table></div>
+    <div class="panel-head standings-head"><h2>🏆 Klasemen</h2><span class="pill" id="matchStandingsLabel">Match berjalan</span></div>
+    <div class="standings-tabs" role="tablist" aria-label="Jenis klasemen">
+      <button class="tab-button active" type="button" role="tab" aria-selected="true" data-standings="match">Klasemen match</button>
+      <button class="tab-button" type="button" role="tab" aria-selected="false" data-standings="overall">Keseluruhan</button>
+    </div>
+    <div class="table-wrap"><table><thead id="leaderHead"></thead><tbody id="leaderboard"></tbody></table></div>
     <div class="empty" id="leaderEmpty">Klasemen muncul setelah pemain ditambahkan.</div>
-  </section>
-  <section class="panel">
-    <div class="panel-head"><h2>Riwayat ronde</h2><button class="small-btn subtle" id="undoBtn" disabled>Batalkan ronde terakhir</button></div>
-    <div class="history-list" id="history"></div>
-    <div class="empty" id="historyEmpty">Belum ada ronde yang disimpan.</div>
   </section>
 </main>
 <aside>
   <section class="panel">
-    <div class="panel-head"><h2>Antrean pemain</h2><span class="pill" id="queuePill">0 menunggu</span></div>
+    <div class="panel-head"><h2>⏳ Antrean pemain</h2><span class="pill" id="queuePill">0 menunggu</span></div>
     <div class="queue-list" id="queueList"></div>
     <div class="empty" id="queueEmpty">Belum ada pemain menunggu.</div>
     <form class="inline-form" id="addPlayerForm"><input id="playerName" maxlength="32" placeholder="Nama pemain baru" autocomplete="off" required><button class="primary" type="submit">+ Tambah</button></form>
   </section>
   <section class="panel">
-    <div class="panel-head"><h2>Pengaturan sesi</h2></div>
+    <div class="panel-head"><h2>⚙️ Pengaturan sesi</h2></div>
     <label class="muted" for="sessionName" style="display:block;font-size:12px;margin-bottom:6px">Nama sesi (opsional)</label>
     <input id="sessionName" maxlength="50" placeholder="Contoh: Domino malam Jumat">
     <div class="form-actions section-gap"><button id="startBtn" class="primary">Mulai sesi</button><button id="exportBtn">Ekspor JSON</button><button id="clearBtn" class="danger">Reset semua data</button></div>
     <p class="muted" style="font-size:12px;margin-bottom:0">Data tersimpan di browser perangkat ini. Ekspor JSON untuk membuat cadangan. Reset menghapus sesi lokal setelah konfirmasi.</p>
-  </section>
-  <section class="panel">
-    <div class="panel-head"><h2>Aturan poin</h2></div>
-    <div class="queue-list">
-      <div class="queue-item"><div class="queue-no winner">1</div><div class="queue-name">Juara 1</div><strong>+4</strong></div>
-      <div class="queue-item"><div class="queue-no">2</div><div class="queue-name">Juara 2</div><strong>+3</strong></div>
-      <div class="queue-item"><div class="queue-no">3</div><div class="queue-name">Juara 3</div><strong>+2</strong></div>
-      <div class="queue-item"><div class="queue-no" style="color:var(--red)">4</div><div class="queue-name">Juara 4</div><strong>+1</strong></div>
-    </div>
-    <p class="muted" style="font-size:12px;margin-bottom:0">Empat pemain menyelesaikan 2 ronde sebelum pergantian. Jumlah yang diganti mengikuti peserta menunggu: 5 peserta = 1 pemain, 6 = 2 pemain, 7 = 3 pemain. Pemain yang keluar masuk ke belakang antrean.</p>
   </section>
 </aside>
 </div>
 <div class="footer-note">Domino Match Manager · Penyimpanan lokal browser · Tidak perlu akun</div>
 </div>
 <div class="toast" id="toast"></div>
-<script>
-(() => {
-const KEY = "domino-match-manager-v1";
-const POINTS = [4,3,2,1];
-const $ = id => document.getElementById(id);
-let state = load();
-let undoSnapshot = null;
-function fresh(){return {sessionName:"",started:false,players:[],active:[],queue:[],rounds:[],nextId:1,nextQueueOrder:1,matchRoundCount:0,matchNumber:1,matchPoints:{},lastMatch:null};}
-function load(){try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&Array.isArray(x.players)&&Array.isArray(x.active)&&Array.isArray(x.queue)&&Array.isArray(x.rounds))return x;}catch(e){}return fresh();}
-function persist(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
-function toast(msg){const el=$("toast");el.textContent=msg;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),2500);}
-function player(id){return state.players.find(p=>p.id===id);}
-function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
-function addPlayer(name){
- name=name.trim();if(!name)return;
- if(state.players.some(p=>p.name.toLocaleLowerCase()===name.toLocaleLowerCase())){toast("Nama pemain sudah terdaftar.");return;}
- const p={id:state.nextId++,name,points:0,rounds:0,queueOrder:state.nextQueueOrder++};
- state.players.push(p);
- if(state.active.length<4 && !state.started){state.active.push(p.id);}
- else state.queue.push(p.id);
- persist();render();$("playerName").value="";toast(name+" ditambahkan.");
-}
-function startSession(){
- if(state.players.length<4){toast("Tambahkan minimal 4 pemain terlebih dahulu.");return;}
- if(state.active.length<4){
-   while(state.active.length<4 && state.queue.length) state.active.push(state.queue.shift());
- }
- if(state.active.length!==4){toast("Meja perlu tepat 4 pemain untuk memulai.");return;}
- state.started=true;state.sessionName=$("sessionName").value.trim();persist();render();toast("Sesi dimulai.");
-}
-function render(){
- $("sessionName").value=state.sessionName||"";
- $("statPlayers").textContent=state.players.length;
- $("statRounds").textContent=state.rounds.length;
- $("statActive").textContent=state.active.length+"/4";
- $("tablePill").textContent=`Meja 1 · ${state.active.length}/4 pemain`;
- $("queuePill").textContent=state.queue.length+" menunggu";
- $("statusBadge").textContent=state.started?"● SESI BERJALAN":"● SIAP DIMULAI";
- $("activeEmpty").style.display=state.active.length?"none":"block";
- $("activePlayers").innerHTML=state.active.map((id,i)=>{const p=player(id);if(!p)return "";return `<div class="player"><div class="player-top"><div class="avatar">${escapeHtml(p.name.slice(0,1).toUpperCase())}</div><div><div class="player-name">${escapeHtml(p.name)}</div><div class="player-sub">Pemain meja · ${i+1}</div></div></div><div class="player-score"><div><div class="score">${p.points}</div><div class="pts">TOTAL POIN</div></div><div class="player-sub">${p.rounds} ronde</div></div></div>`}).join("");
- $("queueEmpty").style.display=state.queue.length?"none":"block";
- $("queueList").innerHTML=state.queue.map((id,i)=>{const p=player(id);if(!p)return "";return `<div class="queue-item"><div class="queue-no">${i+1}</div><div class="queue-name">${escapeHtml(p.name)}</div><button class="small-btn subtle" data-remove="${id}" title="Hapus dari sesi">×</button></div>`}).join("");
- $("rankFields").innerHTML=[1,2,3,4].map(rank=>`<div class="rank-row"><label class="rank-label" for="winner-${rank}">Juara ${rank}<br><span>+${POINTS[rank-1]} poin</span></label><select id="winner-${rank}" name="winner-${rank}" required><option value="">Pilih nama pemain…</option>${state.active.map(id=>{const p=player(id);return `<option value="${id}">${escapeHtml(p.name)}</option>`}).join("")}</select></div>`).join("");
- const ready=state.started&&state.active.length===4;
- $("submitResult").disabled=!ready;
- $("startBtn").disabled=state.started;
- $("startBtn").textContent=state.started?"Sesi berjalan":"Mulai sesi";
- $("leaderEmpty").style.display=state.players.length?"none":"block";
- const sorted=[...state.players].sort((a,b)=>b.points-a.points||a.name.localeCompare(b.name));
- $("leaderboard").innerHTML=sorted.map((p,i)=>`<tr><td><span class="rank-number ${i===0?"winner":""}">${i+1}</span></td><td><strong>${escapeHtml(p.name)}</strong>${state.active.includes(p.id)?' <span style="color:var(--green);font-size:10px">● AKTIF</span>':""}</td><td>${p.rounds}</td><td><strong>${p.points}</strong></td></tr>`).join("");
- const showCurrent=state.matchRoundCount>0;
- const matchSource=showCurrent?{number:state.matchNumber||1,points:state.matchPoints||{},players:state.active}:state.lastMatch;
- $("matchStandingsLabel").textContent=matchSource?`Match ${matchSource.number}${showCurrent?` · ronde ${state.matchRoundCount}/2`:" · terakhir"}`:"Match berjalan";
- const matchPlayers=matchSource?(matchSource.players||[]).map(id=>player(id)).filter(Boolean):[];
- matchPlayers.sort((a,b)=>(matchSource.points[a.id]||0)-(matchSource.points[b.id]||0));
- matchPlayers.reverse();
- $("matchLeaderboard").innerHTML=matchPlayers.map((p,i)=>`<tr><td><span class="rank-number ${i===0?"winner":""}">${i+1}</span></td><td><strong>${escapeHtml(p.name)}</strong></td><td><strong>${matchSource.points[p.id]||0}</strong></td></tr>`).join("");
- $("matchLeaderEmpty").style.display=matchPlayers.length?"none":"block";
- $("historyEmpty").style.display=state.rounds.length?"none":"block";
- $("history").innerHTML=[...state.rounds].reverse().map(r=>`<div class="history-item"><div class="history-top"><span>Match ${r.matchNumber||"—"} · Ronde ${r.matchRound||"—"}/2</span><span class="muted" style="font-size:11px;font-weight:500">${escapeHtml(r.time)}</span></div><div class="history-detail">${r.results.map(x=>`${x.rank}. ${escapeHtml(x.name)} (+${x.points})`).join(" · ")}</div>${r.rotations?.length?`<div class="history-detail" style="margin-top:5px">Pergantian: ${r.rotations.map(x=>`${escapeHtml(x.outName)} keluar, ${escapeHtml(x.inName)} masuk`).join(" · ")}</div>`:""}</div>`).join("");
- $("undoBtn").disabled=state.rounds.length===0;
-}
-$("addPlayerForm").addEventListener("submit",e=>{e.preventDefault();addPlayer($("playerName").value);});
-$("startBtn").addEventListener("click",startSession);
-$("sessionName").addEventListener("change",()=>{state.sessionName=$("sessionName").value.trim();persist();});
-$("rankFields").addEventListener("change",()=>{
- const chosen=[1,2,3,4].map(n=>$("winner-"+n)?.value).filter(Boolean);
- [1,2,3,4].forEach(n=>{
-   const sel=$("winner-"+n); if(!sel)return;
-   [...sel.options].forEach(opt=>{if(opt.value)opt.disabled=chosen.includes(opt.value)&&opt.value!==sel.value;});
- });
-});
-$("resetRanks").addEventListener("click",()=>{
- [1,2,3,4].forEach(n=>{const el=$("winner-"+n);if(el)el.value="";});
- $("rankFields").dispatchEvent(new Event("change",{bubbles:true}));
-});
-$("resultForm").addEventListener("submit",e=>{
- e.preventDefault();
- if(!state.started||state.active.length!==4){toast("Mulai sesi dengan empat pemain aktif terlebih dahulu.");return;}
- const results=[];
- for(const rank of [1,2,3,4]){
-   const id=Number($("winner-"+rank).value);
-   if(!id||!state.active.includes(id)){toast("Pilih nama pemain untuk Juara "+rank+".");return;}
-   results.push({id,rank,points:POINTS[rank-1],name:player(id).name});
- }
- if(new Set(results.map(x=>x.id)).size!==4){toast("Satu pemain tidak boleh mendapat dua peringkat. Pilih empat nama yang berbeda.");return;}
- undoSnapshot=JSON.stringify(state);
- results.forEach(r=>{const p=player(r.id);p.points+=r.points;p.rounds+=1;});
- results.sort((a,b)=>a.rank-b.rank);
- state.matchRoundCount=(state.matchRoundCount||0)+1;
- state.matchPoints=state.matchPoints||{};
- results.forEach(r=>{state.matchPoints[r.id]=(state.matchPoints[r.id]||0)+r.points;});
- const round={number:state.rounds.length+1,time:new Date().toLocaleString("id-ID"),results:results.map(({rank,points,name,id})=>({rank,points,name,id})),matchNumber:state.matchNumber||1,matchRound:state.matchRoundCount,rotations:[]};
- if(state.matchRoundCount===2){
-   const replacementCount=Math.min(state.queue.length,Math.max(0,state.players.length-4));
-   const outgoing=[...state.active].sort((a,b)=>(state.matchPoints[a]??0)-(state.matchPoints[b]??0)||(player(a)?.name||"").localeCompare(player(b)?.name||"")).slice(0,replacementCount);
-   for(const outgoingId of outgoing){
-     const replacementId=state.queue.shift();
-     if(replacementId==null)break;
-     const out=player(outgoingId), incoming=player(replacementId);
-     state.active=state.active.filter(id=>id!==outgoingId);
-     state.active.push(replacementId);
-     state.queue.push(outgoingId);
-     round.rotations.push({outId:outgoingId,outName:out.name,inId:replacementId,inName:incoming.name});
-   }
-   state.lastMatch={number:state.matchNumber||1,players:results.map(r=>r.id),points:{...state.matchPoints}};
-   state.matchRoundCount=0;
-   state.matchNumber=(state.matchNumber||1)+1;
-   state.matchPoints={};
- }
- state.rounds.push(round);
- persist();render();
- toast(round.matchRound===1?`Ronde pertama Match ${round.matchNumber} tersimpan. Pemain yang sama lanjut ronde kedua.`:round.rotations.length?`Match ${round.matchNumber} selesai. ${round.rotations.length} pemain dengan poin match terendah diganti.`:`Match ${round.matchNumber} selesai. Belum ada pemain pengganti di antrean.`);
-});
-$("queueList").addEventListener("click",e=>{
- const btn=e.target.closest("[data-remove]");if(!btn)return;
- const id=Number(btn.dataset.remove);const p=player(id);if(!p)return;
- if(!confirm(`Hapus ${p.name} dari antrean dan sesi? Poinnya akan dihapus juga.`))return;
- state.queue=state.queue.filter(x=>x!==id);state.players=state.players.filter(x=>x.id!==id);persist();render();toast("Pemain dihapus.");
-});
-$("undoBtn").addEventListener("click",()=>{
- if(!state.rounds.length)return;
- if(!confirm("Batalkan ronde terakhir? Poin dan posisi pemain akan dikembalikan ke kondisi sebelum ronde tersebut."))return;
- // Rebuild by restoring the snapshot captured just before latest result.
- if(undoSnapshot){state=JSON.parse(undoSnapshot);undoSnapshot=null;persist();render();toast("Ronde terakhir dibatalkan.");}
- else {toast("Pembatalan tersedia hanya sampai halaman dimuat ulang. Ekspor cadangan sebelum perubahan besar.");}
-});
-$("exportBtn").addEventListener("click",()=>{
- const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
- const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="domino-match-backup.json";a.click();URL.revokeObjectURL(url);toast("Cadangan JSON diekspor.");
-});
-$("clearBtn").addEventListener("click",()=>{
- if(!confirm("Yakin reset semua data Domino Match di browser ini? Tindakan ini tidak bisa dibatalkan."))return;
- state=fresh();undoSnapshot=null;persist();render();toast("Semua data sesi direset.");
-});
-render();
-})();
-</script>
 </body>
 </html>
