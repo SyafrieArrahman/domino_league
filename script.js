@@ -24,12 +24,14 @@
   let arenaOpen = Boolean(state.pendingBattle?.arena);
   let arenaPreviousFocus = null;
   let toastTimer = null;
+  let timerInterval = null;
 
   function fresh() {
     return {
       sessionName: "", started: false, players: [], active: [], queue: [], rounds: [],
       nextId: 1, nextQueueOrder: 1, matchRoundCount: 0, matchNumber: 1,
-      matchPoints: {}, lastMatch: null, pendingBattle: null, lastBattle: null
+      matchPoints: {}, lastMatch: null, pendingBattle: null, lastBattle: null,
+      timer: { running: false, elapsedMs: 0, startedAt: null }
     };
   }
 
@@ -38,10 +40,25 @@
       const saved = JSON.parse(localStorage.getItem(KEY));
       if (saved && Array.isArray(saved.players) && Array.isArray(saved.active) &&
           Array.isArray(saved.queue) && Array.isArray(saved.rounds)) {
+        const players = saved.players.map(item => ({
+          ...item,
+          onBreak: Boolean(item.onBreak)
+        }));
+        const timer = saved.timer && typeof saved.timer === "object"
+          ? {
+              running: Boolean(saved.timer.running),
+              elapsedMs: Number(saved.timer.elapsedMs) || 0,
+              startedAt: saved.timer.startedAt ? Number(saved.timer.startedAt) : null
+            }
+          : { running: false, elapsedMs: 0, startedAt: null };
         return {
-          ...fresh(), ...saved, matchPoints: saved.matchPoints || {},
-          matchNumber: saved.matchNumber || 1, matchRoundCount: saved.matchRoundCount || 0,
-          pendingBattle: saved.pendingBattle || null, lastBattle: saved.lastBattle || null
+          ...fresh(), ...saved, players,
+          matchPoints: saved.matchPoints || {},
+          matchNumber: saved.matchNumber || 1,
+          matchRoundCount: saved.matchRoundCount || 0,
+          pendingBattle: saved.pendingBattle || null,
+          lastBattle: saved.lastBattle || null,
+          timer
         };
       }
     } catch (error) {}
@@ -50,6 +67,102 @@
 
   function persist() {
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (error) {}
+  }
+
+  function formatDuration(ms) {
+    const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    if (hours > 0) {
+      return String(hours).padStart(2, "0") + ":" +
+        String(minutes).padStart(2, "0") + ":" +
+        String(seconds).padStart(2, "0");
+    }
+    return String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
+  }
+
+  function currentTimerMs() {
+    if (!state.timer) state.timer = { running: false, elapsedMs: 0, startedAt: null };
+    if (state.timer.running && state.timer.startedAt) {
+      return state.timer.elapsedMs + Math.max(0, Date.now() - state.timer.startedAt);
+    }
+    return state.timer.elapsedMs || 0;
+  }
+
+  function syncTimerLoop() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    if (state.timer?.running) {
+      timerInterval = setInterval(renderTimerDisplay, 250);
+    }
+  }
+
+  function startStopwatch() {
+    if (!state.timer) state.timer = { running: false, elapsedMs: 0, startedAt: null };
+    if (!state.timer.running) {
+      state.timer.running = true;
+      state.timer.startedAt = Date.now();
+      persist();
+      syncTimerLoop();
+      renderTimerDisplay();
+    }
+  }
+
+  function pauseStopwatch() {
+    if (!state.timer || !state.timer.running) return;
+    state.timer.elapsedMs = currentTimerMs();
+    state.timer.running = false;
+    state.timer.startedAt = null;
+    persist();
+    syncTimerLoop();
+    renderTimerDisplay();
+  }
+
+  function toggleStopwatch() {
+    if (state.timer?.running) {
+      pauseStopwatch();
+      toast("Waktu dijeda.", "info");
+    } else {
+      startStopwatch();
+      toast("Waktu berjalan.", "info");
+    }
+  }
+
+  function restartStopwatch(autoStart) {
+    const shouldRun = typeof autoStart === "boolean" ? autoStart : Boolean(state.timer?.running);
+    state.timer = {
+      running: shouldRun,
+      elapsedMs: 0,
+      startedAt: shouldRun ? Date.now() : null
+    };
+    persist();
+    syncTimerLoop();
+    renderTimerDisplay();
+  }
+
+  function renderTimerDisplay() {
+    const ms = currentTimerMs();
+    const isRunning = Boolean(state.timer?.running);
+    $("timerDisplay").textContent = formatDuration(ms);
+    const toggleBtn = $("timerToggleBtn");
+    const badge = $("timerBadge");
+    if (isRunning) {
+      toggleBtn.textContent = "⏸ Pause";
+      toggleBtn.className = "small-btn break-btn";
+      badge.textContent = "BERJALAN";
+      badge.dataset.status = "running";
+    } else if (ms > 0) {
+      toggleBtn.textContent = "▶ Lanjut";
+      toggleBtn.className = "small-btn primary";
+      badge.textContent = "DIJEDA";
+      badge.dataset.status = "paused";
+    } else {
+      toggleBtn.textContent = "▶ Mulai";
+      toggleBtn.className = "small-btn primary";
+      badge.textContent = "BERHENTI";
+      badge.dataset.status = "stopped";
+    }
   }
 
   function toast(message, type) {
@@ -72,7 +185,6 @@
 
   function confirmDialog(options) {
     const layer = $("dialogLayer");
-    const dialog = $("confirmDialog");
     const cancelButton = $("dialogCancel");
     const confirmButton = $("dialogConfirm");
     const closeButton = $("dialogClose");
@@ -146,6 +258,23 @@
     return state.players.find(item => item.id === id);
   }
 
+  function readyQueueIds() {
+    return state.queue.filter(id => {
+      const p = player(id);
+      return p && !p.onBreak;
+    });
+  }
+
+  function shiftNextReadyFromQueue() {
+    const idx = state.queue.findIndex(id => {
+      const p = player(id);
+      return p && !p.onBreak;
+    });
+    if (idx === -1) return null;
+    const [nextId] = state.queue.splice(idx, 1);
+    return nextId;
+  }
+
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, character => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"
@@ -164,32 +293,112 @@
       return;
     }
     const newPlayer = {
-      id: state.nextId++, name, points: 0, rounds: 0, queueOrder: state.nextQueueOrder++
+      id: state.nextId++, name, points: 0, rounds: 0, queueOrder: state.nextQueueOrder++, onBreak: false
     };
     state.players.push(newPlayer);
-    if (state.active.length < 4 && !state.started) state.active.push(newPlayer.id);
-    else state.queue.push(newPlayer.id);
+    if (state.active.length < 4) {
+      state.active.push(newPlayer.id);
+      if (state.started && state.matchPoints[newPlayer.id] === undefined) {
+        state.matchPoints[newPlayer.id] = 0;
+      }
+    } else {
+      state.queue.push(newPlayer.id);
+    }
     persist();
     render();
     $("playerName").value = "";
     toast(name + " ditambahkan.");
   }
 
-  function startSession() {
-    if (state.players.length < 4) {
-      toast("Tambahkan minimal 4 pemain terlebih dahulu.", "warning");
+  function setPlayerBreak(id) {
+    if (state.pendingBattle) {
+      toast("Selesaikan Battle Arena terlebih dahulu.", "warning");
       return;
     }
-    while (state.active.length < 4 && state.queue.length) state.active.push(state.queue.shift());
+    const current = player(id);
+    if (!current || current.onBreak) return;
+
+    if (state.active.includes(id)) {
+      const replacementId = shiftNextReadyFromQueue();
+      if (replacementId == null && state.started) {
+        toast("Tidak ada pemain siap di antrean untuk menggantikan " + current.name + ".", "warning");
+        return;
+      }
+      const activeIdx = state.active.indexOf(id);
+      if (replacementId != null) {
+        state.active.splice(activeIdx, 1, replacementId);
+        if (state.matchPoints[replacementId] === undefined) {
+          state.matchPoints[replacementId] = 0;
+        }
+      } else {
+        state.active.splice(activeIdx, 1);
+      }
+      current.onBreak = true;
+      state.queue = state.queue.filter(qId => qId !== id);
+      persist();
+      render();
+      if (replacementId != null) {
+        const rep = player(replacementId);
+        toast(current.name + " istirahat (Break). Digantikan oleh " + (rep ? rep.name : "pemain antrean") + ".", "info");
+      } else {
+        toast(current.name + " istirahat (Break).", "info");
+      }
+      return;
+    }
+
+    current.onBreak = true;
+    state.queue = state.queue.filter(qId => qId !== id);
+    persist();
+    render();
+    toast(current.name + " istirahat (Break). Poin tetap tersimpan.", "info");
+  }
+
+  function resumePlayerFromBreak(id) {
+    if (state.pendingBattle) {
+      toast("Selesaikan Battle Arena terlebih dahulu.", "warning");
+      return;
+    }
+    const current = player(id);
+    if (!current || !current.onBreak) return;
+    current.onBreak = false;
+
+    if (state.active.length < 4) {
+      state.active.push(id);
+      if (state.started && state.matchPoints[id] === undefined) {
+        state.matchPoints[id] = 0;
+      }
+      persist();
+      render();
+      toast(current.name + " kembali bermain dan langsung masuk ke meja.", "success");
+    } else {
+      if (!state.queue.includes(id)) state.queue.push(id);
+      persist();
+      render();
+      toast(current.name + " aktif kembali dan masuk antrean.", "success");
+    }
+  }
+
+  function startSession() {
+    const availableCount = state.players.filter(p => !p.onBreak).length;
+    if (availableCount < 4) {
+      toast("Perlu minimal 4 pemain siap (tidak sedang break) untuk memulai.", "warning");
+      return;
+    }
+    while (state.active.length < 4) {
+      const nextId = shiftNextReadyFromQueue();
+      if (nextId == null) break;
+      state.active.push(nextId);
+    }
     if (state.active.length !== 4) {
-      toast("Meja perlu tepat 4 pemain untuk memulai.", "warning");
+      toast("Meja perlu tepat 4 pemain aktif untuk memulai.", "warning");
       return;
     }
     state.started = true;
     state.sessionName = $("sessionName").value.trim();
+    startStopwatch();
     persist();
     render();
-    toast("Sesi dimulai.", "info");
+    toast("Sesi dimulai & waktu berjalan.", "info");
   }
 
   function readChoices() {
@@ -222,15 +431,23 @@
     const options = POINT_OPTIONS.map(option =>
       '<option value="' + option.value + '">' + option.label + "</option>"
     ).join("");
+    const hasReadyReplacement = readyQueueIds().length > 0;
     $("activePlayers").innerHTML = state.active.map((id, index) => {
       const currentPlayer = player(id);
       if (!currentPlayer) return "";
+      const matchPts = state.matchPoints[id] || 0;
+      const canBreakNow = !state.pendingBattle && (!state.started || hasReadyReplacement);
+      const breakTitle = state.started && !hasReadyReplacement
+        ? "Perlu minimal 1 pemain menunggu di antrean untuk menggantikan"
+        : "Istirahat & ganti dengan pemain antrean";
       return '<article class="player">' +
         '<div class="player-top"><div class="avatar">' +
         escapeHtml(currentPlayer.name.slice(0, 1).toUpperCase()) +
         '</div><div class="player-heading"><div class="player-name">' +
         escapeHtml(currentPlayer.name) + '</div><div class="player-sub">Pemain meja · ' +
-        (index + 1) + '</div></div></div>' +
+        (index + 1) + (state.matchRoundCount > 0 ? " · Poin match: " + matchPts : "") + '</div></div>' +
+        '<button type="button" class="break-btn" data-break-active="' + id + '" title="' + breakTitle + '"' +
+        (canBreakNow ? "" : " disabled") + '>☕ Break</button></div>' +
         '<div class="player-score"><div><div class="score">' + currentPlayer.points +
         '</div><div class="pts">POIN KESELURUHAN</div></div><div class="player-sub">' +
         currentPlayer.rounds + ' ronde</div></div>' +
@@ -281,7 +498,11 @@
       $("leaderboard").innerHTML = overallPlayers.map((item, index) =>
         '<tr><td><span class="rank-number ' + (index === 0 ? "winner" : "") + '">' +
         (index + 1) + '</span></td><td><strong>' + escapeHtml(item.name) + "</strong>" +
-        (state.active.includes(item.id) ? ' <span class="active-tag">● AKTIF</span>' : "") +
+        (state.active.includes(item.id)
+          ? ' <span class="active-tag">● AKTIF</span>'
+          : item.onBreak
+          ? ' <span class="break-tag">☕ BREAK</span>'
+          : "") +
         "</td><td>" + item.rounds + '</td><td><strong>' + item.points +
         "</strong></td></tr>"
       ).join("");
@@ -394,7 +615,7 @@
     round.rotations = [];
     round.tieBreakCards = cards;
     outgoingIds.forEach(outgoingId => {
-      const replacementId = state.queue.shift();
+      const replacementId = shiftNextReadyFromQueue();
       if (replacementId == null) return;
       const outgoingPlayer = player(outgoingId);
       const incomingPlayer = player(replacementId);
@@ -590,24 +811,42 @@
     $("statRounds").textContent = state.rounds.length;
     $("statActive").textContent = state.active.length + "/4";
     $("tablePill").textContent = "Meja 1 · " + state.active.length + "/4 pemain";
-    $("queuePill").textContent = state.queue.length + " menunggu";
+    const readyQueue = readyQueueIds();
+    const breakPlayers = state.players.filter(p => p.onBreak);
+    $("queuePill").textContent = readyQueue.length + " menunggu";
     $("statusBadge").textContent = state.started ? "● SESI BERJALAN" : "● SIAP DIMULAI";
     $("roundInstructions").textContent = state.pendingBattle
       ? "Match " + state.pendingBattle.matchNumber + " selesai. Selesaikan tie-break di Battle Arena untuk melihat klasemen dan pergantian pemain."
       : state.started
       ? "Match " + (state.matchNumber || 1) + " · ronde " + Math.min(state.matchRoundCount + 1, 2) + "/2. " +
-        (state.matchRoundCount === 1 ? "Empat pemain yang sama menyelesaikan match ini." : "Pilih satu juara untuk setiap pemain.")
+        (state.matchRoundCount === 1 ? "Empat pemain di meja menyelesaikan match ini." : "Pilih satu juara untuk setiap pemain.")
       : "Pilih peringkat di setiap kartu pemain. Setiap ronde harus memiliki juara 1 sampai 4 masing-masing satu.";
     $("activeEmpty").style.display = state.active.length ? "none" : "block";
-    $("queueEmpty").style.display = state.queue.length ? "none" : "block";
-    $("queueList").innerHTML = state.queue.map((id, index) => {
+    $("queueEmpty").style.display = readyQueue.length ? "none" : "block";
+    $("queueList").innerHTML = readyQueue.map((id, index) => {
       const item = player(id);
       if (!item) return "";
       return '<div class="queue-item"><div class="queue-no">' + (index + 1) +
         '</div><div class="queue-name">' + escapeHtml(item.name) +
-        '</div><button class="small-btn subtle" data-remove="' + id +
+        '<span class="queue-sub">' + item.points + ' poin · ' + item.rounds + ' ronde</span></div>' +
+        '<button type="button" class="break-btn" data-break-queue="' + id +
+        '" title="Istirahat sementara"' + (state.pendingBattle ? " disabled" : "") + '>☕ Break</button>' +
+        '<button type="button" class="small-btn subtle" data-remove="' + id +
         '" title="Hapus dari sesi"' + (state.pendingBattle ? " disabled" : "") + '>×</button></div>';
     }).join("");
+
+    $("breakSection").hidden = breakPlayers.length === 0;
+    $("breakPill").textContent = breakPlayers.length + " break";
+    $("breakList").innerHTML = breakPlayers.map(item =>
+      '<div class="queue-item is-break"><div class="queue-no">☕</div>' +
+      '<div class="queue-name">' + escapeHtml(item.name) +
+      '<span class="queue-sub">Poin tersimpan: ' + item.points + ' poin (' + item.rounds + ' ronde)</span></div>' +
+      '<button type="button" class="resume-btn" data-resume="' + item.id + '"' +
+      (state.pendingBattle ? " disabled" : "") + '>▶ Main lagi</button>' +
+      '<button type="button" class="small-btn subtle" data-remove="' + item.id +
+      '" title="Hapus dari sesi"' + (state.pendingBattle ? " disabled" : "") + '>×</button></div>'
+    ).join("");
+
     renderPlayers();
     $("startBtn").disabled = state.started;
     $("startBtn").textContent = state.started ? "Sesi berjalan" : "Mulai sesi";
@@ -615,7 +854,14 @@
     renderStandings();
     renderHistory();
     renderBattle();
+    renderTimerDisplay();
   }
+
+  $("timerToggleBtn").addEventListener("click", toggleStopwatch);
+  $("timerRestartBtn").addEventListener("click", () => {
+    restartStopwatch(Boolean(state.timer?.running));
+    toast("Waktu di-restart ke 00:00.", "info");
+  });
 
   $("addPlayerForm").addEventListener("submit", event => {
     event.preventDefault();
@@ -682,6 +928,12 @@
     persist();
   });
   $("activePlayers").addEventListener("change", updateChoiceOptions);
+  $("activePlayers").addEventListener("click", event => {
+    const breakBtn = event.target.closest("[data-break-active]");
+    if (!breakBtn) return;
+    const id = Number(breakBtn.dataset.breakActive);
+    setPlayerBreak(id);
+  });
   $("resetRanks").addEventListener("click", () => {
     readChoices().forEach(select => { select.value = ""; });
     updateChoiceOptions();
@@ -736,8 +988,13 @@
 
     if (state.matchRoundCount === 2) {
       const matchParticipants = [...state.active];
-      const replacementCount = Math.min(state.queue.length, Math.max(0, state.players.length - 4));
-      const matchPoints = { ...state.matchPoints };
+      const readyWaitingCount = readyQueueIds().length;
+      const activeNonBreakPlayers = state.players.filter(p => !p.onBreak).length;
+      const replacementCount = Math.min(readyWaitingCount, Math.max(0, activeNonBreakPlayers - 4));
+      const matchPoints = {};
+      matchParticipants.forEach(id => {
+        matchPoints[id] = state.matchPoints[id] || 0;
+      });
       const scoreGroups = new Map();
       matchParticipants.forEach(id => {
         const score = matchPoints[id] || 0;
@@ -772,19 +1029,29 @@
       $("battleArena").scrollIntoView({ behavior: "smooth", block: "center" });
     }
     toast(round.matchRound === 1
-      ? "Ronde pertama Match " + round.matchNumber + " tersimpan. Empat pemain yang sama lanjut ronde kedua."
+      ? "Ronde pertama Match " + round.matchNumber + " tersimpan. Empat pemain di meja lanjut ronde kedua."
       : state.pendingBattle
         ? "Poin seri setelah dua ronde. Buka Battle Arena dan acak kartu domino untuk menentukan juara."
       : round.rotations.length
         ? "Match " + round.matchNumber + " selesai. " + round.rotations.length + " pemain dengan poin terendah diganti."
-        : "Match " + round.matchNumber + " selesai. Antrean kosong, belum ada pemain yang diganti.",
+        : "Match " + round.matchNumber + " selesai. Antrean siap kosong, belum ada pemain yang diganti.",
       round.matchRound === 1 ? "info" : state.pendingBattle ? "warning" : "success");
   });
 
-  $("queueList").addEventListener("click", async event => {
-    const button = event.target.closest("[data-remove]");
-    if (!button) return;
-    const id = Number(button.dataset.remove);
+  async function handleQueueOrBreakActions(event) {
+    const breakBtn = event.target.closest("[data-break-queue]");
+    if (breakBtn) {
+      setPlayerBreak(Number(breakBtn.dataset.breakQueue));
+      return;
+    }
+    const resumeBtn = event.target.closest("[data-resume]");
+    if (resumeBtn) {
+      resumePlayerFromBreak(Number(resumeBtn.dataset.resume));
+      return;
+    }
+    const removeBtn = event.target.closest("[data-remove]");
+    if (!removeBtn) return;
+    const id = Number(removeBtn.dataset.remove);
     const item = player(id);
     if (!item) return;
     if (state.pendingBattle) {
@@ -804,7 +1071,10 @@
     persist();
     render();
     toast("Pemain dihapus.");
-  });
+  }
+
+  $("queueList").addEventListener("click", handleQueueOrBreakActions);
+  $("breakList").addEventListener("click", handleQueueOrBreakActions);
 
   $("undoBtn").addEventListener("click", async () => {
     if (!state.rounds.length) return;
@@ -820,6 +1090,7 @@
       state = JSON.parse(undoSnapshot);
       undoSnapshot = null;
       persist();
+      syncTimerLoop();
       render();
       toast("Ronde terakhir dibatalkan.");
     } else {
@@ -842,7 +1113,7 @@
     const accepted = await confirmDialog({
       kicker: "Reset sesi",
       title: "Hapus semua data?",
-      message: "Semua pemain, poin, antrean, dan riwayat Domino Match di browser ini akan dihapus. Tindakan ini tidak dapat dibatalkan.",
+      message: "Semua pemain, poin, antrean, waktu, dan riwayat Domino Match di browser ini akan dihapus. Tindakan ini tidak dapat dibatalkan.",
       confirmText: "Reset semua data",
       tone: "danger"
     });
@@ -850,10 +1121,12 @@
     state = fresh();
     undoSnapshot = null;
     persist();
+    syncTimerLoop();
     render();
     toast("Semua data sesi direset.");
   });
 
   applyTheme();
+  syncTimerLoop();
   render();
 })();
