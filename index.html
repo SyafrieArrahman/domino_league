@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#f4f6f3">
+<meta name="theme-color" content="#e6d7b6">
 <title>Domino Match Manager</title>
 <link rel="stylesheet" href="style.css">
 <script src="script.js" defer></script>
@@ -28,6 +28,11 @@
             <div><span>Juara 4</span><strong>+1 atau -1 poin</strong></div>
           </div>
           <p>Jumlah pergantian mengikuti peserta siap main: 5 orang = 1 pemain, 6 orang = 2 pemain, 7 orang = 3 pemain. Pemain yang keluar masuk ke belakang antrean.</p>
+        </details>
+        <details class="dropdown-section">
+          <summary>Streak &amp; gelar pemain</summary>
+          <p>Streak, win rate, dan gelar dihitung otomatis dari hasil setiap ronde. Gelar tampil di samping nama pada klasemen keseluruhan.</p>
+          <div class="badge-guide" id="badgeGuide"></div>
         </details>
         <details class="dropdown-section">
           <summary>Riwayat match</summary>
@@ -99,8 +104,8 @@
     <div class="panel-head"><h2>⚙️ Pengaturan sesi</h2></div>
     <label class="muted" for="sessionName" style="display:block;font-size:12px;margin-bottom:6px">Nama sesi (opsional)</label>
     <input id="sessionName" maxlength="50" placeholder="Contoh: Domino malam Jumat">
-    <div class="form-actions section-gap"><button id="startBtn" class="primary">Mulai sesi</button><button id="exportBtn">Ekspor JSON</button><button id="clearBtn" class="danger">Reset semua data</button></div>
-    <p class="muted" style="font-size:12px;margin-bottom:0">Data tersimpan di browser perangkat ini. Ekspor JSON untuk membuat cadangan. Reset menghapus sesi lokal setelah konfirmasi.</p>
+    <div class="form-actions section-gap"><button id="startBtn" class="primary">Mulai sesi</button><button id="recapBtn" type="button">Rekap sesi</button><button id="exportBtn">Ekspor JSON</button><button id="importBtn" type="button">Impor JSON</button><input type="file" id="importFile" accept=".json,application/json" hidden><button id="clearBtn" class="danger">Reset semua data</button></div>
+    <p class="muted" style="font-size:12px;margin-bottom:0">Data tersimpan di browser perangkat ini. Ekspor JSON untuk membuat cadangan, Impor JSON untuk memulihkannya. Reset menghapus sesi lokal setelah konfirmasi.</p>
   </section>
 </aside>
 </div>
@@ -116,6 +121,12 @@
       <div class="arena-reveal" id="arenaReveal" hidden></div>
       <div class="arena-actions" id="arenaActions"></div>
     </div>
+  </section>
+</div>
+<div class="recap-layer" id="recapLayer" hidden>
+  <section class="recap-window" role="dialog" aria-modal="true" aria-labelledby="recapTitle">
+    <div class="recap-card" id="recapCard"></div>
+    <div class="recap-actions"><button class="primary" id="recapShare" type="button">Bagikan gambar</button><button id="recapClose" type="button">Tutup</button></div>
   </section>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"><span class="toast-icon" id="toastIcon" aria-hidden="true">✓</span><span id="toastMessage"></span></div>
