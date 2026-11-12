@@ -1708,4 +1708,11 @@
   syncTimerLoop();
   renderBadgeGuide();
   render();
+
+  // Mode offline & pasang di layar utama (hanya jalan lewat http/https, bukan file://).
+  if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("sw.js").catch(() => { /* aplikasi tetap jalan tanpa offline */ });
+    });
+  }
 })();
