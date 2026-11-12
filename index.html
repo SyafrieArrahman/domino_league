@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#e6d7b6">
+<meta name="theme-color" content="#17503a">
 <title>Domino Match Manager</title>
 <link rel="stylesheet" href="style.css">
 <script src="script.js" defer></script>
@@ -11,12 +11,12 @@
 <body>
 <div class="wrap">
 <header>
-  <a class="brand" href="#" aria-label="Domino Match Manager"><div class="logo">D</div><div><div class="eyebrow">Table & Score Manager</div><h1 class="title">Domino Match</h1></div></a>
+  <a class="brand" href="#" aria-label="Domino Match Manager"><svg class="logo" viewBox="0 0 32 52" role="img" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="49" rx="6.5" fill="#fbfaf3" stroke="#16201a" stroke-width="3"/><path d="M5 26h22" stroke="#16201a" stroke-width="2.4" stroke-linecap="round"/><g fill="#16201a"><circle cx="9.5" cy="8.5" r="2.6"/><circle cx="22.5" cy="8.5" r="2.6"/><circle cx="9.5" cy="19" r="2.6"/><circle cx="22.5" cy="19" r="2.6"/><circle cx="9.5" cy="33" r="2.6"/><circle cx="22.5" cy="43.5" r="2.6"/></g><circle cx="16" cy="13.75" r="2.6" fill="#c4351f"/><circle cx="16" cy="38.25" r="2.6" fill="#c4351f"/><circle cx="16" cy="26" r="3.4" fill="#c8941f" stroke="#16201a" stroke-width="1.6"/></svg><h1 class="title">Domino Match</h1></a>
   <div class="header-actions">
-    <div class="status" id="statusBadge">● SIAP DIMULAI</div>
+    <div class="status" id="statusBadge">Siap dimulai</div>
     <button class="theme-toggle" id="themeToggle" type="button" aria-label="Ganti ke mode gelap">☾ <span>Gelap</span></button>
     <details class="header-dropdown">
-      <summary>Menu ▾</summary>
+      <summary>Menu</summary>
       <div class="dropdown-content">
         <details class="dropdown-section">
           <summary>Aturan main</summary>
@@ -45,19 +45,19 @@
   </div>
 </header>
 <section class="stats">
-  <div class="stat"><div class="label">PEMAIN TERDAFTAR</div><div class="num" id="statPlayers">0</div></div>
-  <div class="stat"><div class="label">RONDE SELESAI</div><div class="num" id="statRounds">0</div></div>
-  <div class="stat"><div class="label">PEMAIN AKTIF</div><div class="num" id="statActive">0/4</div></div>
+  <div class="stat"><div class="label">Pemain terdaftar</div><div class="num" id="statPlayers">0</div></div>
+  <div class="stat"><div class="label">Ronde selesai</div><div class="num" id="statRounds">0</div></div>
+  <div class="stat"><div class="label">Pemain aktif</div><div class="num" id="statActive">0/4</div></div>
   <div class="stat timer-stat">
     <div class="timer-top">
-      <div class="label">WAKTU BERJALAN</div>
-      <span class="timer-badge" id="timerBadge">BERHENTI</span>
+      <div class="label">Waktu berjalan</div>
+      <span class="timer-badge" id="timerBadge">Berhenti</span>
     </div>
     <div class="timer-row">
       <div class="num timer-display" id="timerDisplay">00:00</div>
       <div class="timer-controls">
-        <button type="button" class="small-btn primary" id="timerToggleBtn" aria-label="Mulai waktu">▶ Mulai</button>
-        <button type="button" class="small-btn subtle" id="timerRestartBtn" aria-label="Restart waktu">↺ Restart</button>
+        <button type="button" class="small-btn primary" id="timerToggleBtn" aria-label="Mulai waktu">Mulai</button>
+        <button type="button" class="small-btn subtle" id="timerRestartBtn" aria-label="Restart waktu">Restart</button>
       </div>
     </div>
   </div>
@@ -65,22 +65,22 @@
 <div class="layout">
 <main>
   <section class="panel">
-    <div class="panel-head"><h2>♟ Sedang bermain</h2><span class="pill" id="tablePill">Meja 1 · 0/4 pemain</span></div>
+    <div class="panel-head"><h2>Sedang bermain</h2><span class="pill" id="tablePill">Meja 1 · 0/4 pemain</span></div>
     <p class="muted match-instructions" id="roundInstructions">Pilih peringkat di setiap kartu pemain. Setiap ronde harus memiliki juara 1 sampai 4 masing-masing satu.</p>
     <form id="resultForm">
       <div class="players" id="activePlayers"></div>
       <div class="empty" id="activeEmpty">Tambahkan minimal 4 pemain untuk memulai.</div>
-      <div class="form-actions"><button class="primary" id="submitResult" type="submit" disabled>Simpan hasil ronde →</button><button type="button" class="subtle" id="resetRanks">Reset pilihan</button></div>
+      <div class="form-actions"><button class="primary" id="submitResult" type="submit" disabled>Simpan hasil ronde</button><button type="button" class="subtle" id="resetRanks">Reset pilihan</button></div>
     </form>
   </section>
   <section class="panel battle-arena" id="battleArena" hidden>
-    <div class="panel-head"><div><div class="eyebrow battle-eyebrow">Domino showdown</div><h2>⚔️ Battle Arena</h2></div><span class="pill" id="battleBadge">Tie-break</span></div>
+    <div class="panel-head"><h2>Battle Arena</h2><span class="pill" id="battleBadge">Tie-break</span></div>
     <p class="muted battle-message" id="battleMessage"></p>
     <div class="battle-cards" id="battleCards" aria-live="polite"></div>
-    <div class="form-actions" id="battleActions"><button class="primary" id="openArenaBtn" type="button">Masuk Battle Arena →</button></div>
+    <div class="form-actions" id="battleActions"><button class="primary" id="openArenaBtn" type="button">Masuk Battle Arena</button></div>
   </section>
   <section class="panel">
-    <div class="panel-head standings-head"><h2>🏆 Klasemen</h2><span class="pill" id="matchStandingsLabel">Match berjalan</span></div>
+    <div class="panel-head standings-head"><h2>Klasemen</h2><span class="pill" id="matchStandingsLabel">Match berjalan</span></div>
     <div class="standings-tabs" role="tablist" aria-label="Jenis klasemen">
       <button class="tab-button active" type="button" role="tab" aria-selected="true" data-standings="match">Klasemen match</button>
       <button class="tab-button" type="button" role="tab" aria-selected="false" data-standings="overall">Keseluruhan</button>
@@ -91,17 +91,17 @@
 </main>
 <aside>
   <section class="panel">
-    <div class="panel-head"><h2>⏳ Antrean pemain</h2><span class="pill" id="queuePill">0 menunggu</span></div>
+    <div class="panel-head"><h2>Antrean pemain</h2><span class="pill" id="queuePill">0 menunggu</span></div>
     <div class="queue-list" id="queueList"></div>
     <div class="empty" id="queueEmpty">Belum ada pemain menunggu.</div>
     <div class="break-section" id="breakSection" hidden>
-      <div class="break-head"><span>☕ Sedang istirahat (Break)</span><span class="pill" id="breakPill">0 break</span></div>
+      <div class="break-head"><span>Sedang istirahat</span><span class="pill" id="breakPill">0 break</span></div>
       <div class="queue-list" id="breakList"></div>
     </div>
     <form class="inline-form" id="addPlayerForm"><input id="playerName" maxlength="32" placeholder="Nama pemain baru" autocomplete="off"><button class="primary" type="submit">+ Tambah</button></form>
   </section>
   <section class="panel">
-    <div class="panel-head"><h2>⚙️ Pengaturan sesi</h2></div>
+    <div class="panel-head"><h2>Pengaturan sesi</h2></div>
     <label class="muted" for="sessionName" style="display:block;font-size:12px;margin-bottom:6px">Nama sesi (opsional)</label>
     <input id="sessionName" maxlength="50" placeholder="Contoh: Domino malam Jumat">
     <div class="form-actions section-gap"><button id="startBtn" class="primary">Mulai sesi</button><button id="recapBtn" type="button">Rekap sesi</button><button id="exportBtn">Ekspor JSON</button><button id="importBtn" type="button">Impor JSON</button><input type="file" id="importFile" accept=".json,application/json" hidden><button id="clearBtn" class="danger">Reset semua data</button></div>
@@ -109,15 +109,15 @@
   </section>
 </aside>
 </div>
-<div class="footer-note">Domino Match Manager · Penyimpanan lokal browser · Tidak perlu akun</div>
+<div class="footer-note">Data tersimpan di browser ini. Tidak perlu akun.</div>
 </div>
 <div class="arena-overlay" id="arenaOverlay" hidden>
   <section class="arena-window" role="dialog" aria-modal="true" aria-labelledby="arenaTitle" aria-describedby="arenaInstruction">
-    <div class="arena-topbar"><div><span class="arena-live-dot"></span><span id="arenaMatchLabel">BATTLE ARENA</span></div><button class="arena-close" id="closeArena" type="button" aria-label="Tutup arena">×</button></div>
+    <div class="arena-topbar"><div><span class="arena-live-dot"></span><span id="arenaMatchLabel">Battle Arena</span></div><button class="arena-close" id="closeArena" type="button" aria-label="Tutup arena">×</button></div>
     <div class="arena-content">
-      <div class="arena-intro"><div class="arena-kicker">FINAL DRAW</div><h2 id="arenaTitle">Penentuan juara</h2><p id="arenaInstruction"></p></div>
+      <div class="arena-intro"><h2 id="arenaTitle">Penentuan juara</h2><p id="arenaInstruction"></p></div>
       <div class="arena-duelists" id="arenaDuelists"></div>
-      <div class="arena-deck-wrap" id="arenaDeckWrap"><div class="arena-deck-head"><span>PILIH KARTU DOMINO</span><span class="arena-deck-count" id="arenaDeckCount"></span></div><div class="arena-deck" id="arenaDeck"></div></div>
+      <div class="arena-deck-wrap" id="arenaDeckWrap"><div class="arena-deck-head"><span>Pilih kartu domino</span><span class="arena-deck-count" id="arenaDeckCount"></span></div><div class="arena-deck" id="arenaDeck"></div></div>
       <div class="arena-reveal" id="arenaReveal" hidden></div>
       <div class="arena-actions" id="arenaActions"></div>
     </div>

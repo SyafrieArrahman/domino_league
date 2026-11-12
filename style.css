@@ -1,7 +1,7 @@
-@import url("https://fonts.googleapis.com/css2?family=Bevan&family=Libre+Franklin:wght@400;600;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&display=swap");
 
 /* ==========================================================
-   Domino Match Manager — Retro Cafe & Felt Table
+   Domino Match Manager — Felt Table (v2)
    Lantai kafe berpetak, kartu menu kertas, meja domino berlapis felt.
    ========================================================== */
 
@@ -785,3 +785,275 @@ body.arena-open{overflow:hidden}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+/* ==========================================================
+   Redesign v3 — Domino. Aturan warna 60/30/10:
+   60% meja felt hijau (latar), 30% ubin gading/hitam (panel & kartu),
+   10% merah pip (aksi utama, tab aktif, pin). Teks selalu memakai pasangan
+   --text di atas --surface; teks di atas latar halaman memakai --on-bg.
+   ========================================================== */
+:root{
+  --display:"Schibsted Grotesk","Helvetica Neue",Arial,sans-serif;
+  --body:"Schibsted Grotesk","Helvetica Neue",Arial,sans-serif;
+  --bg:#17503a; --on-bg:#f3f1e7; --tile:#17503a;
+  --surface:#f3f1e7; --surface-soft:#e4e1d1; --paper:#fbfaf3; --surface-felt:#dbe6dd;
+  --edge:#16201a; --edge-soft:#cbc7b3; --hard:transparent;
+  --text:#16201a; --muted:#566057;
+  --felt-hi:#1f6347; --felt:#124030; --felt-dark:#0b2a1e; --wood:#0b2a1e;
+  --accent:#c4351f; --on-accent:#ffffff; --accent-tint:#dde8dc; --accent-tint-ink:#17402d;
+  --brass:#c8941f; --gold-text:#7a5a10; --red:#b3261e; --blue:#2c5a73;
+  --amber-bg:#f1e1a8; --amber-ink:#5a4410; --amber-edge:#c9ae5c;
+  --r-sm:8px; --r-md:12px; --r-lg:14px;
+}
+:root[data-theme="dark"]{
+  --bg:#0b1310; --on-bg:#ece9dc; --tile:#0b1310;
+  --surface:#1a231f; --surface-soft:#252f2a; --paper:#212b26; --surface-felt:#173226;
+  --edge:#46544b; --edge-soft:#2d3832; --hard:transparent;
+  --text:#ece9dc; --muted:#a7b2a9;
+  --felt-hi:#14503a; --felt:#0e3a2a; --felt-dark:#082016; --wood:#082016;
+  --accent:#ff6b4f; --on-accent:#1a0803; --accent-tint:#24392d; --accent-tint-ink:#a6e3c2;
+  --brass:#e0b04a; --gold-text:#e3c36a; --red:#ff8f80; --blue:#86bfd6;
+  --amber-bg:#3a2d10; --amber-ink:#f0d48e; --amber-edge:#6b5a2c;
+}
+body{
+  background-color:var(--bg);
+  background-image:radial-gradient(rgba(255,255,255,.035) 1px,transparent 1.4px),radial-gradient(ellipse at 50% 0,rgba(255,255,255,.07),transparent 60%);
+  background-size:6px 6px,100% 100%;
+  font-size:15px;
+}
+.wrap{padding-top:24px}
+
+/* Header: logo adalah ubin domino 5-3 */
+.brand{color:var(--on-bg)}
+.logo{
+  width:30px;height:48px;border:2px solid #16201a;border-radius:7px;box-shadow:none;
+  font-size:0;color:transparent;background-color:#fbfaf3;
+  background-image:
+    linear-gradient(#16201a,#16201a),
+    radial-gradient(circle,#16201a 0 3px,transparent 3.5px),radial-gradient(circle,#16201a 0 3px,transparent 3.5px),
+    radial-gradient(circle,#16201a 0 3px,transparent 3.5px),radial-gradient(circle,#c4351f 0 3px,transparent 3.5px),
+    radial-gradient(circle,#16201a 0 3px,transparent 3.5px);
+  background-repeat:no-repeat;
+  background-size:100% 2px,7px 7px,7px 7px,7px 7px,7px 7px,7px 7px;
+  background-position:0 50%,3px 4px,14px 4px,8px 12px,3px 26px,14px 33px;
+}
+.title{color:var(--on-bg);font:700 clamp(22px,3.2vw,30px)/1.1 var(--display);letter-spacing:-.02em}
+.status{border:1.5px solid var(--edge);border-radius:999px;box-shadow:none;background:var(--surface);color:var(--text);font-size:12px;font-weight:600;letter-spacing:0}
+.header-dropdown>summary,.theme-toggle{border:1.5px solid var(--edge);border-radius:10px;box-shadow:none;background:var(--surface);color:var(--text);font-weight:600}
+.header-dropdown>summary:hover,.header-dropdown[open]>summary{transform:none;box-shadow:none;background:var(--surface-soft)}
+.dropdown-content{border:2px solid var(--edge);border-radius:16px;background:var(--surface);box-shadow:0 14px 36px rgba(0,0,0,.35)}
+.dropdown-section{border-bottom:1px solid var(--edge-soft)}
+.dropdown-section>summary{font:650 15px/1.3 var(--body)}
+.rule-list>div,.history-item{border:1px solid var(--edge-soft);border-radius:10px}
+
+/* Ubin: stat & panel. Garis tengah = pembagi domino, pin kuningan di tengahnya */
+.stat,.panel{border:2px solid var(--edge);border-radius:16px;background:var(--surface);color:var(--text);box-shadow:none}
+.stat{padding:12px 16px 14px;border-radius:14px}
+.stat:after{display:none}
+.stat>.label,.timer-top{padding-bottom:8px;margin-bottom:6px;border-bottom:2px solid var(--edge)}
+.stat .label{color:var(--muted);font-size:12px;font-weight:600;letter-spacing:0}
+.stat .num{font:700 28px/1.15 var(--display);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.timer-top .label{padding:0;margin:0;border:0}
+.timer-badge{border:1.5px solid var(--edge-soft);border-radius:999px;padding:2px 8px;font-size:11px;font-weight:600;letter-spacing:0}
+.timer-badge[data-status="running"]{border-color:var(--accent)}
+.panel{padding:20px}
+.panel-head{position:relative;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid var(--edge)}
+.panel-head::after{
+  content:"";position:absolute;left:50%;bottom:-7px;width:12px;height:12px;margin-left:-6px;
+  border:2px solid var(--edge);border-radius:50%;background:var(--brass);
+}
+.panel h2{font:700 17px/1.25 var(--display);letter-spacing:-.01em}
+.pill{border:1.5px solid var(--edge-soft);border-radius:999px;padding:4px 10px;background:var(--surface-soft);color:var(--muted);font-size:12px;font-weight:600}
+.match-instructions{font-size:13px}
+
+/* Meja felt + kartu pemain berbentuk ubin */
+.players{
+  padding:16px;border:2px solid var(--felt-dark);border-radius:18px;
+  background-color:var(--felt);
+  background-image:radial-gradient(rgba(255,255,255,.04) 1px,transparent 1.4px),radial-gradient(ellipse at 50% 35%,var(--felt-hi),var(--felt) 78%);
+  background-size:5px 5px,100% 100%;
+  box-shadow:inset 0 0 50px rgba(0,0,0,.35);
+}
+.player{
+  padding:12px 14px 14px;border:2px solid var(--edge);border-radius:14px;
+  background:var(--paper);color:var(--text);box-shadow:0 5px 0 rgba(0,0,0,.28);
+}
+.player:focus-within{box-shadow:0 0 0 3px var(--brass),0 5px 0 rgba(0,0,0,.28)}
+.avatar{width:36px;height:36px;border:0;border-radius:50%;color:var(--paper);background:var(--text);box-shadow:none;font:700 15px/1 var(--display)}
+.player-name{font-weight:700}
+.player-score{position:relative;margin-top:12px;padding-top:12px;border-top:2px solid var(--edge)}
+.player-score::before{
+  content:"";position:absolute;left:50%;top:-7px;width:11px;height:11px;margin-left:-5.5px;
+  border:2px solid var(--edge);border-radius:50%;background:var(--brass);
+}
+.score{font:700 28px/1 var(--display);letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--text)}
+.pts{font-size:11px;font-weight:500;letter-spacing:0;color:var(--muted)}
+.choice-label{font-size:12px;font-weight:600;color:var(--muted)}
+
+/* Form & tombol */
+select,input{border:1.5px solid var(--edge);border-radius:10px;box-shadow:none;background:var(--paper);color:var(--text)}
+select:focus,input:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 30%,transparent)}
+button{border:1.5px solid var(--edge);border-radius:10px;box-shadow:none;background:var(--paper);color:var(--text);font-weight:600;transition:background .12s,transform .08s}
+button:hover:not(:disabled){transform:none;box-shadow:none;background:var(--surface-soft)}
+button:active:not(:disabled){transform:scale(.97);box-shadow:none}
+.primary{border-color:var(--accent);color:var(--on-accent);background:var(--accent)}
+.primary:hover:not(:disabled){background:var(--accent);filter:brightness(1.1)}
+.danger{color:var(--red);border-color:var(--red)}
+.subtle{border-color:transparent;background:transparent;color:var(--muted)}
+.small-btn,.break-btn,.resume-btn{border-radius:8px;font-size:12px}
+.break-btn{color:var(--amber-ink);background:var(--amber-bg);border-color:var(--amber-edge)}
+.resume-btn{color:var(--accent-tint-ink);background:var(--accent-tint);border-color:transparent}
+.empty{border:1.5px dashed var(--edge-soft);border-radius:12px;background:var(--paper);color:var(--muted)}
+
+/* Antrean */
+.queue-item{border:1.5px solid var(--edge-soft);border-radius:12px;background:var(--paper)}
+.queue-item.is-break{border-style:dashed}
+.queue-no{border-radius:50%;color:var(--paper);background:var(--text);font:700 12px/1 var(--display)}
+.queue-item.is-break .queue-no{color:var(--amber-ink);background:var(--amber-bg)}
+.queue-name{font-size:13px;font-weight:600;color:var(--text)}
+.break-section{border-top:2px dashed var(--edge-soft)}
+.break-head{font-size:12px;font-weight:600;color:var(--muted)}
+
+/* Klasemen */
+th,td{border-bottom:1px solid var(--edge-soft);font-size:13px;color:var(--text)}
+th{border-bottom:2px solid var(--edge);color:var(--muted);font-size:12px;font-weight:600;letter-spacing:0}
+tbody tr:hover{background:var(--surface-soft)}
+.rank-number{border:0;border-radius:50%;color:var(--paper);background:var(--text);font:700 12px/1 var(--display)}
+.rank-number.winner{color:var(--on-accent);background:var(--accent)}
+.tab-button{border:1.5px solid var(--edge);border-radius:999px;font-size:13px;color:var(--text);background:var(--paper)}
+.tab-button.active{border-color:var(--accent);color:var(--on-accent);background:var(--accent)}
+.streak{border:0;border-radius:999px;font:700 11px/1.5 var(--display)}
+.streak-none{border:1px dashed var(--edge-soft)}
+.streak-hot{box-shadow:none}
+.badge{border:0;border-radius:999px;box-shadow:none;padding:1px 8px;font-size:11px;font-weight:600}
+.badge-crown{background:#e8c65a;color:#2a2208}
+.badge-fire{background:#b83a2b}
+.badge-comeback{background:#f0dfa0;color:#2a2208}
+.badge-king,.badge-arena{background:#0b1310;color:#e8c65a}
+.badge-wall{background:#475569}
+.badge-record{background:#7a5a10}
+.badge-veteran{background:#4a5a52}
+.badge-last{background:#66756c}
+.badge-bonus{background:#e3e9e4;color:#16211b}
+.badge-new{background:#d3e6da;color:#17402d}
+:root[data-theme="dark"] .badge-king{border:1px solid #e8c65a}
+
+/* Dialog, toast, rekap */
+.confirm-dialog,.recap-window,.toast{border:2px solid var(--edge);border-radius:18px;background:var(--surface);color:var(--text);box-shadow:0 18px 44px rgba(0,0,0,.35)}
+.dialog-kicker,.recap-kicker,.arena-kicker{text-transform:none;letter-spacing:0}
+.dialog-close,.arena-close{border:0}
+.footer-note{color:var(--on-bg);opacity:.8;font-size:12px}
+@media(max-width:560px){.wrap{padding:16px 14px 40px}.panel{padding:16px}.players{padding:12px;border-radius:16px}}
+
+/* Kartu rekap (pratinjau) — selaras dengan gambar story */
+.recap-layer{background:rgba(5,16,11,.78)}
+.recap-card{border:2px solid #16201a;border-radius:18px;color:#16201a;background:#f3f1e7;box-shadow:0 18px 44px rgba(0,0,0,.4)}
+.recap-top{padding:18px 18px 18px;color:#16201a;background:none;border-bottom:3px solid #16201a;position:relative}
+.recap-top::after{content:"";position:absolute;left:50%;bottom:-9px;width:14px;height:14px;margin-left:-7px;border:3px solid #16201a;border-radius:50%;background:#c8941f}
+.recap-kicker{color:#566057;font-size:12px;font-weight:600;letter-spacing:0}
+.recap-title{font:700 28px/1.1 var(--display);letter-spacing:-.02em}
+.recap-date{color:#566057}
+.recap-body{padding-top:22px}
+.recap-stat{border:0;border-left:2px solid #cbc7b3;border-radius:0;background:none}
+.recap-stat:first-child{border-left:0}
+.recap-stat b{font:700 22px/1.25 var(--display)}
+.recap-stat span{color:#566057;font-size:11px;font-weight:500}
+.recap-section-title{border-bottom:2px solid #16201a;font:700 15px/1.3 var(--display)}
+.recap-row{border-bottom:1px solid #cbc7b3}
+.recap-medal{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;color:#f3f1e7;background:#16201a;font:700 13px/1 var(--display)}
+.recap-row:first-of-type .recap-medal{background:#c4351f}
+.recap-medal:empty::before{content:"";width:9px;height:9px;border-radius:50%;background:#c4351f}
+.recap-medal:empty{background:none;color:inherit}
+.recap-sub{color:#566057}
+.recap-score{font:700 22px/1 var(--display)}
+.recap-foot{border-top:1px solid #cbc7b3;color:#566057}
+@media(max-width:560px){.stat>.label{min-height:3em}}
+
+/* Logo */
+header .brand .logo{width:32px;height:52px;border:0;border-radius:0;background:none;box-shadow:none;flex-shrink:0;display:block;filter:drop-shadow(0 3px 0 rgba(0,0,0,.3))}
+
+/* ==========================================================
+   Battle Arena — ruang penentuan yang gelap dan menegangkan
+   ========================================================== */
+.arena-overlay{background:radial-gradient(ellipse at 50% 35%,rgba(10,30,21,.9),rgba(2,6,4,.97))}
+.arena-window{
+  border:2px solid #2d4a3a;border-radius:22px;color:#ece9dc;
+  background-color:#0a2217;
+  background-image:radial-gradient(rgba(255,255,255,.035) 1px,transparent 1.4px),radial-gradient(ellipse at 50% 28%,#1d6446 0,#0f3b28 42%,#050f0a 100%);
+  background-size:5px 5px,100% 100%;
+  box-shadow:inset 0 0 90px rgba(0,0,0,.65),0 30px 80px rgba(0,0,0,.6);
+}
+.arena-topbar{border-bottom:1px solid #ffffff1f;color:#ece9dc;font-size:13px;font-weight:600;letter-spacing:0}
+.arena-live-dot{width:10px;height:10px;background:#ff5a3d;box-shadow:0 0 0 0 rgba(255,90,61,.7);animation:arena-heartbeat 1.1s ease-out infinite}
+.arena-close{border:1.5px solid #ffffff55;border-radius:10px;color:#ece9dc}
+.arena-intro h2{color:#fbf8ec;font:700 clamp(30px,5.5vw,52px)/1.05 var(--display);letter-spacing:-.025em;text-shadow:0 2px 24px rgba(0,0,0,.6)}
+.arena-intro p{color:#c6d4c9;font-size:14px}
+
+.arena-duelist{border:1.5px solid #ffffff2e;border-radius:14px;background:rgba(3,12,8,.45)}
+.arena-duelist.duelist-current{border-color:#ff6b4f;background:rgba(255,107,79,.12);box-shadow:0 0 0 0 rgba(255,107,79,.55);animation:arena-heartbeat 1.3s ease-out infinite}
+.arena-duelist.duelist-picked{border-color:#6cc596}
+.arena-duelist-number{color:#8fa597;font:700 11px/1 var(--display)}
+.arena-duelist-info strong{color:#f4f1e4;font-size:13px}
+.arena-duelist-info span{color:#a9b9ad;font-size:11px}
+.duelist-current .arena-duelist-info span{color:#ffb4a5;font-weight:700}
+.arena-mini-back{border:1.5px solid #3a5446;border-radius:6px;color:#e0b04a;background:#101a15;box-shadow:none;font-weight:700}
+.arena-mini-back.selected{color:#9be0b8;background:#173a29;border-color:#6cc596}
+
+.arena-deck-wrap{border:1.5px dashed #ffffff30;border-radius:16px;background:rgba(2,9,6,.5)}
+.arena-deck-head{color:#c6d4c9;font-size:12px;font-weight:600;letter-spacing:0}
+.arena-deck-count{color:#ffb4a5}
+/* Kartu tertutup = punggung ubin domino hitam dengan pin kuningan */
+.arena-pick-card{
+  border:2px solid #3a5446;border-radius:12px;color:#c9d6cc;
+  background:linear-gradient(160deg,#222d27,#0d1511);
+  box-shadow:0 6px 0 rgba(0,0,0,.55);
+}
+.arena-pick-card::before{content:"";position:absolute;left:10px;right:10px;top:50%;height:2px;margin-top:-1px;background:#ffffff40}
+.arena-pick-card:hover:not(:disabled){border-color:#ff6b4f;box-shadow:0 10px 0 rgba(0,0,0,.55),0 0 22px rgba(255,107,79,.45);animation:arena-tremble .18s linear infinite}
+.arena-card-index{color:#aebcb2;font-size:11px;font-weight:600;letter-spacing:0;z-index:1}
+.arena-card-back{width:18px;height:18px;border:2px solid #0d1511;border-radius:50%;background:#e0b04a;font-size:0;z-index:1}
+.arena-card-prompt{color:#e8e5d6;font-size:11px;font-weight:600;letter-spacing:0;z-index:1}
+.arena-pick-card.arena-extra-card:disabled{opacity:.55}
+
+/* Hasil: ubin gading terbuka satu per satu */
+.arena-result-heading{color:#ffb4a5;font-size:12px;font-weight:600;letter-spacing:0}
+.arena-result-heading strong{color:#a9b9ad;font-size:12px}
+.arena-final-card{border:1.5px solid #ffffff30;border-radius:16px;background:rgba(3,12,8,.55);animation:arena-flip-slow .9s cubic-bezier(.2,.7,.2,1) both}
+.arena-final-card:nth-child(2){animation-delay:.55s}
+.arena-final-card:nth-child(3){animation-delay:1.1s}
+.arena-final-card:nth-child(4){animation-delay:1.65s}
+.arena-final-card.final-out{border-color:#ff8f80;background:rgba(160,48,36,.28)}
+.arena-final-card.final-winner{border-color:#e0b04a;background:rgba(224,176,74,.14);box-shadow:0 0 28px rgba(224,176,74,.35);animation:arena-flip-slow .9s cubic-bezier(.2,.7,.2,1) both,arena-winner-glow 1.6s ease-in-out 2.4s infinite}
+.arena-final-name strong{color:#f4f1e4;font-size:13px}
+.arena-final-name span{font-size:11px;font-weight:700;letter-spacing:0;color:#c6d4c9}
+.final-winner .arena-final-name span{color:#f0d284}
+.final-out .arena-final-name span{color:#ffb4a5}
+.arena-domino{border:2px solid #16201a;border-radius:10px;background:#fbfaf3;box-shadow:0 4px 0 rgba(0,0,0,.45)}
+.arena-domino-divider{background:#16201a}
+.arena-final-score{color:#b9c8bd;font-size:11px}
+.arena-final-score b{color:#fbf8ec;font-size:12px}
+.arena-extra{border:1.5px dashed #ffffff40;border-radius:12px;color:#f0d284;font-size:12px;font-weight:600;letter-spacing:0}
+.arena-extra small{color:#a9b9ad;font-size:12px}
+.arena-actions button{min-width:220px;border:0;border-radius:12px;color:#fff;background:#c4351f;box-shadow:0 5px 0 #7d1f10;font-size:14px;font-weight:700}
+.arena-actions button:hover:not(:disabled){background:#d63d26;box-shadow:0 5px 0 #7d1f10}
+.arena-actions button:active:not(:disabled){transform:translateY(4px);box-shadow:0 1px 0 #7d1f10}
+.arena-reveal-button{animation:arena-cta 1.2s ease-in-out infinite}
+
+/* Hitung mundur 3-2-1 */
+.arena-countdown{
+  position:fixed;z-index:5;left:50%;top:50%;width:190px;height:190px;margin:-95px 0 0 -95px;display:grid;place-items:center;
+  border:6px solid #fbf8ec;border-radius:50%;color:#fbf8ec;background:rgba(8,16,12,.82);
+  font:700 108px/1 var(--display);box-shadow:0 0 0 12px rgba(255,107,79,.25),0 0 80px rgba(255,107,79,.5);
+  animation:arena-count .75s cubic-bezier(.2,.8,.2,1) both;pointer-events:none;
+}
+.is-suspense .arena-window{animation:arena-jitter .12s linear infinite;box-shadow:inset 0 0 140px rgba(196,53,31,.55),0 30px 80px rgba(0,0,0,.6)}
+.is-suspense .arena-content{filter:blur(2px) brightness(.6);transition:filter .3s}
+
+@keyframes arena-heartbeat{0%{box-shadow:0 0 0 0 rgba(255,107,79,.65)}70%,100%{box-shadow:0 0 0 12px rgba(255,107,79,0)}}
+@keyframes arena-tremble{0%,100%{transform:translateY(-8px) rotate(-1.2deg)}50%{transform:translateY(-8px) rotate(1.2deg)}}
+@keyframes arena-flip-slow{0%{opacity:0;transform:perspective(600px) rotateY(90deg) scale(.9)}60%{opacity:1;transform:perspective(600px) rotateY(-10deg) scale(1.03)}100%{opacity:1;transform:perspective(600px) rotateY(0) scale(1)}}
+@keyframes arena-winner-glow{50%{box-shadow:0 0 46px rgba(224,176,74,.6)}}
+@keyframes arena-cta{50%{transform:scale(1.04)}}
+@keyframes arena-count{0%{opacity:0;transform:scale(1.7)}25%{opacity:1}100%{opacity:1;transform:scale(1)}}
+@keyframes arena-jitter{0%{transform:translate(1px,0)}33%{transform:translate(-1px,1px)}66%{transform:translate(0,-1px)}100%{transform:translate(1px,0)}}
+@media(prefers-reduced-motion:reduce){.arena-duelist.duelist-current,.arena-live-dot,.arena-reveal-button,.arena-final-card.final-winner{animation:none}}

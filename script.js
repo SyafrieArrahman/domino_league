@@ -238,19 +238,19 @@
     const toggleBtn = $("timerToggleBtn");
     const badge = $("timerBadge");
     if (isRunning) {
-      toggleBtn.textContent = "⏸ Pause";
+      toggleBtn.textContent = "Jeda";
       toggleBtn.className = "small-btn break-btn";
-      badge.textContent = "BERJALAN";
+      badge.textContent = "Berjalan";
       badge.dataset.status = "running";
     } else if (ms > 0) {
-      toggleBtn.textContent = "▶ Lanjut";
+      toggleBtn.textContent = "Lanjut";
       toggleBtn.className = "small-btn primary";
-      badge.textContent = "DIJEDA";
+      badge.textContent = "Dijeda";
       badge.dataset.status = "paused";
     } else {
-      toggleBtn.textContent = "▶ Mulai";
+      toggleBtn.textContent = "Mulai";
       toggleBtn.className = "small-btn primary";
-      badge.textContent = "BERHENTI";
+      badge.textContent = "Berhenti";
       badge.dataset.status = "stopped";
     }
   }
@@ -341,7 +341,7 @@
     $("themeToggle").innerHTML = isDark ? "☀ <span>Terang</span>" : "☾ <span>Gelap</span>";
     $("themeToggle").setAttribute("aria-label", isDark ? "Ganti ke mode terang" : "Ganti ke mode gelap");
     const themeColor = document.querySelector('meta[name="theme-color"]');
-    if (themeColor) themeColor.content = isDark ? "#1a110b" : "#e6d7b6";
+    if (themeColor) themeColor.content = isDark ? "#0b1310" : "#17503a";
   }
 
   function player(id) {
@@ -530,13 +530,13 @@
     };
     const highlights = [];
     const mostWins = best(entry => entry.wins, 1);
-    if (mostWins) highlights.push({ icon: "🎯", label: "Juara 1 terbanyak", name: mostWins.name, value: mostWins.value + "×" });
+    if (mostWins) highlights.push({ icon: "", label: "Juara 1 terbanyak", name: mostWins.name, value: mostWins.value + "×" });
     const longest = best(entry => entry.bestWin, 2);
-    if (longest) highlights.push({ icon: "🔥", label: "Win streak terpanjang", name: longest.name, value: longest.value + " ronde" });
+    if (longest) highlights.push({ icon: "", label: "Win streak terpanjang", name: longest.name, value: longest.value + " ronde" });
     const rate = best(entry => (entry.played >= 3 ? entry.wins / entry.played : -1), 0.01);
-    if (rate) highlights.push({ icon: "📈", label: "Win rate tertinggi", name: rate.name, value: Math.round(rate.value * 100) + "%" });
+    if (rate) highlights.push({ icon: "", label: "Win rate tertinggi", name: rate.name, value: Math.round(rate.value * 100) + "%" });
     const arena = best(entry => entry.arenaWins, 1);
-    if (arena) highlights.push({ icon: "⚔️", label: "Jawara Arena", name: arena.name, value: arena.value + "×" });
+    if (arena) highlights.push({ icon: "", label: "Jawara Arena", name: arena.name, value: arena.value + "×" });
     const now = new Date();
     const elapsed = currentTimerMs();
     return {
@@ -547,7 +547,7 @@
       matches: state.rounds.filter(round => round.matchRound === 2).length,
       duration: elapsed > 0 ? formatDuration(elapsed) : "–",
       podium: ranked.slice(0, 3).map((item, index) => ({
-        medal: ["🥇", "🥈", "🥉"][index], name: item.name, points: item.points,
+        medal: String(index + 1), name: item.name, points: item.points,
         rate: winRateText(stats.get(item.id)), played: stats.get(item.id).played
       })),
       highlights
@@ -578,84 +578,105 @@
   }
 
   function drawRecapCanvas(data) {
-    const W = 1080, M = 56, SH = 14, TOP = 290, ROW = 116, HROW = 100;
-    const rows = data.podium.length;
-    const hl = data.highlights.length;
-    const H = M + TOP + 36 + 130 + 44 + 60 + rows * ROW + (hl ? 44 + 60 + hl * HROW : 0) + 110 + M + SH;
-    const cardX = M, cardY = M, cardW = W - M * 2 - SH, cardH = H - M * 2 - SH;
-    const innerX = cardX + 56, innerW = cardW - 112;
-    const ink = "#2a1a10", muted = "#6f5a45", dotted = "#c9b389";
-    const display = 'Bevan, Rockwell, "Roboto Slab", Georgia, serif';
-    const sans = '"Libre Franklin", "Helvetica Neue", Arial, sans-serif';
+    // Format story Instagram: 1080 x 1920 (9:16). Konten ditengahkan secara vertikal.
+    const W = 1080, H = 1920, CX = 60, CW = W - CX * 2, PAD = 56, ROW = 118, HROW = 92, DIV = 470;
+    const rows = data.podium.length, hl = data.highlights.length;
+    const innerX = CX + PAD, innerW = CW - PAD * 2;
+    const ink = "#16201a", muted = "#566057", ivory = "#f3f1e7", soft = "#cbc7b3", red = "#c4351f", brass = "#c8941f";
+    const font = '"Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif';
+    const bottomH = 50 + 84 + rows * ROW + (hl ? 40 + 84 + hl * HROW : 0) + 30 + 96;
+    const CH = DIV + bottomH, CY = Math.round((H - CH) / 2);
     const canvas = document.createElement("canvas");
     canvas.width = W;
     canvas.height = H;
     const c = canvas.getContext("2d");
-    const write = (str, x, y, font, color, align) => {
-      c.font = font; c.fillStyle = color; c.textAlign = align || "left"; c.textBaseline = "alphabetic";
+    const write = (str, x, y, weight, size, color, align) => {
+      c.font = weight + " " + size + "px " + font; c.fillStyle = color; c.textAlign = align || "left"; c.textBaseline = "alphabetic";
       c.fillText(str, x, y);
     };
-    const fit = (str, font, maxWidth) => {
-      c.font = font;
+    const fit = (str, weight, size, maxWidth) => {
+      c.font = weight + " " + size + "px " + font;
       if (c.measureText(str).width <= maxWidth) return str;
       let out = str;
       while (out.length > 1 && c.measureText(out + "…").width > maxWidth) out = out.slice(0, -1);
       return out + "…";
     };
-    const rule = (y, dash) => {
-      c.save(); c.strokeStyle = dotted; c.lineWidth = 4; c.setLineDash(dash);
-      c.beginPath(); c.moveTo(innerX, y); c.lineTo(innerX + innerW, y); c.stroke(); c.restore();
+    const sizeFor = (str, weight, size, min, maxWidth) => {
+      while (size > min) { c.font = weight + " " + size + "px " + font; if (c.measureText(str).width <= maxWidth) break; size -= 2; }
+      return size;
+    };
+    const tile = (x, y, w, h, r) => {
+      c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
+      c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
+    };
+    const dot = (x, y, r, color) => { c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fillStyle = color; c.fill(); };
+    const line = (x1, y1, x2, y2, color, width) => {
+      c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.lineWidth = width; c.strokeStyle = color; c.stroke();
     };
 
-    c.fillStyle = "#e6d7b6"; c.fillRect(0, 0, W, H);
-    c.fillStyle = ink; c.fillRect(cardX + SH, cardY + SH, cardW, cardH);
-    c.fillStyle = "#f7efd9"; c.fillRect(cardX, cardY, cardW, cardH);
-    c.lineWidth = 6; c.strokeStyle = ink; c.strokeRect(cardX + 3, cardY + 3, cardW - 6, cardH - 6);
-    c.fillStyle = "#1f5c3e"; c.fillRect(cardX + 6, cardY + 6, cardW - 12, TOP - 6);
-    c.fillStyle = "#6b3f23"; c.fillRect(cardX + 6, cardY + TOP - 8, cardW - 12, 8);
-    write("REKAP SESI DOMINO", innerX, cardY + 92, "800 28px " + sans, "#f0d58a");
-    write(fit(data.title, "400 68px " + display, innerW), innerX, cardY + 176, "400 68px " + display, "#f7efd9");
-    write(data.date, innerX, cardY + 238, "400 30px " + sans, "#cfe2c8");
+    // Latar: meja felt (60%)
+    c.fillStyle = "#17503a"; c.fillRect(0, 0, W, H);
+    const glow = c.createRadialGradient(W / 2, 0, 0, W / 2, 0, H * 0.7);
+    glow.addColorStop(0, "rgba(255,255,255,.10)"); glow.addColorStop(1, "rgba(255,255,255,0)");
+    c.fillStyle = glow; c.fillRect(0, 0, W, H);
+    c.fillStyle = "rgba(255,255,255,.04)";
+    for (let gy = 0; gy < H; gy += 6) for (let gx = 0; gx < W; gx += 6) c.fillRect(gx, gy, 2, 2);
 
-    let y = cardY + TOP + 36;
-    const boxW = (innerW - 40) / 3;
+    // Ubin gading (30%)
+    tile(CX, CY + 18, CW, CH, 56); c.fillStyle = "rgba(0,0,0,.28)"; c.fill();
+    tile(CX, CY, CW, CH, 56); c.fillStyle = ivory; c.fill();
+    tile(CX + 4, CY + 4, CW - 8, CH - 8, 52); c.lineWidth = 8; c.strokeStyle = ink; c.stroke();
+
+    // Bagian atas: judul dan angka sesi
+    write("Rekap sesi domino", innerX, CY + 96, 600, 30, muted);
+    const titleSize = sizeFor(data.title, 700, 84, 48, innerW);
+    write(fit(data.title, 700, titleSize, innerW), innerX, CY + 188, 700, titleSize, ink);
+    write(data.date, innerX, CY + 246, 500, 32, muted);
+    const colW = innerW / 3;
     [[String(data.rounds), "Ronde"], [String(data.matches), "Match"], [data.duration, "Durasi"]].forEach((item, index) => {
-      const x = innerX + index * (boxW + 20);
-      c.fillStyle = "#fffaea"; c.fillRect(x, y, boxW, 130);
-      c.lineWidth = 4; c.strokeStyle = ink; c.strokeRect(x + 2, y + 2, boxW - 4, 126);
-      write(item[0], x + boxW / 2, y + 70, "400 48px " + display, ink, "center");
-      write(item[1], x + boxW / 2, y + 108, "800 24px " + sans, muted, "center");
+      const x = innerX + index * colW;
+      if (index) line(x, CY + 296, x, CY + 416, soft, 4);
+      const numSize = sizeFor(item[0], 700, 76, 40, colW - 28);
+      write(fit(item[0], 700, numSize, colW - 28), x + colW / 2, CY + 372, 700, numSize, ink, "center");
+      write(item[1], x + colW / 2, CY + 414, 500, 28, muted, "center");
     });
 
-    y += 130 + 44;
-    write("Podium", innerX, y + 30, "400 40px " + display, ink);
-    rule(y + 52, [4, 10]);
-    y += 60;
-    data.podium.forEach(row => {
-      write(row.medal, innerX + 6, y + 70, "56px " + sans, ink);
-      write(fit(row.name, "800 38px " + sans, innerW - 270), innerX + 96, y + 56, "800 38px " + sans, ink);
-      write("Win rate " + row.rate + " · " + row.played + " ronde", innerX + 96, y + 92, "600 26px " + sans, muted);
-      write(String(row.points), innerX + innerW, y + 72, "400 50px " + display, ink, "right");
+    // Garis pembagi domino + pin
+    line(innerX - 8, CY + DIV, innerX + innerW + 8, CY + DIV, ink, 6);
+    dot(W / 2, CY + DIV, 22, brass); c.beginPath(); c.arc(W / 2, CY + DIV, 22, 0, Math.PI * 2); c.lineWidth = 6; c.strokeStyle = ink; c.stroke();
+
+    // Bagian bawah: podium
+    let y = CY + DIV + 50;
+    write("Podium", innerX, y + 44, 700, 44, ink);
+    line(innerX, y + 68, innerX + innerW, y + 68, ink, 4);
+    y += 84;
+    data.podium.forEach((row, index) => {
+      const cy2 = y + ROW / 2 - 8;
+      dot(innerX + 36, cy2, 34, index === 0 ? red : ink);
+      write(String(index + 1), innerX + 36, cy2 + 14, 700, 40, ivory, "center");
+      write(fit(row.name, 700, 40, innerW - 270), innerX + 100, y + 52, 700, 40, ink);
+      write("Win rate " + row.rate + " · " + row.played + " ronde", innerX + 100, y + 90, 500, 28, muted);
+      write(String(row.points), innerX + innerW, y + 72, 700, 60, ink, "right");
       y += ROW;
-      rule(y - 6, [10, 8]);
+      line(innerX, y - 8, innerX + innerW, y - 8, soft, 3);
     });
 
     if (hl) {
-      y += 44;
-      write("Sorotan", innerX, y + 30, "400 40px " + display, ink);
-      rule(y + 52, [4, 10]);
-      y += 60;
+      y += 40;
+      write("Sorotan", innerX, y + 44, 700, 44, ink);
+      line(innerX, y + 68, innerX + innerW, y + 68, ink, 4);
+      y += 84;
       data.highlights.forEach(row => {
-        write(row.icon, innerX + 6, y + 64, "50px " + sans, ink);
-        write(fit(row.name, "800 36px " + sans, innerW - 330), innerX + 96, y + 50, "800 36px " + sans, ink);
-        write(row.label, innerX + 96, y + 84, "600 26px " + sans, muted);
-        write(row.value, innerX + innerW, y + 62, "800 34px " + sans, ink, "right");
+        dot(innerX + 36, y + HROW / 2 - 6, 10, red);
+        write(fit(row.name, 700, 36, innerW - 340), innerX + 100, y + 44, 700, 36, ink);
+        write(row.label, innerX + 100, y + 78, 500, 28, muted);
+        write(row.value, innerX + innerW, y + 60, 700, 40, ink, "right");
         y += HROW;
       });
     }
 
-    rule(cardY + cardH - 92, [10, 8]);
-    write("Domino Match Manager", cardX + cardW / 2, cardY + cardH - 40, "600 26px " + sans, muted, "center");
+    line(innerX, CY + CH - 96, innerX + innerW, CY + CH - 96, soft, 3);
+    write("Domino Match Manager", W / 2, CY + CH - 46, 600, 28, muted, "center");
     return canvas;
   }
 
@@ -663,6 +684,9 @@
     recapFile = null;
     try {
       if (document.fonts && document.fonts.ready) await document.fonts.ready;
+      if (document.fonts && document.fonts.load) {
+        try { await Promise.all([700, 600, 500].map(w => document.fonts.load(w + ' 40px "Schibsted Grotesk"'))); } catch (error) { /* pakai font cadangan */ }
+      }
       const blob = await new Promise(resolve => drawRecapCanvas(data).toBlob(resolve, "image/png"));
       if (blob && recapOpen && recapData === data) {
         recapFile = new File([blob], "rekap-domino-" + data.fileDate + ".png", { type: "image/png" });
@@ -891,7 +915,7 @@
         escapeHtml(currentPlayer.name) + '</div><div class="player-sub">Pemain meja · ' +
         (index + 1) + (state.matchRoundCount > 0 ? " · Poin match: " + matchPts : "") + '</div></div>' +
         '<button type="button" class="break-btn" data-break-active="' + id + '" title="' + breakTitle + '"' +
-        (canBreakNow ? "" : " disabled") + '>☕ Break</button></div>' +
+        (canBreakNow ? "" : " disabled") + '>Break</button></div>' +
         '<div class="player-score"><div><div class="score">' + currentPlayer.points +
         '</div><div class="pts">POIN KESELURUHAN</div></div><div class="player-meta"><div class="player-sub">' +
         currentPlayer.rounds + ' ronde</div>' + streakChip(statsMap.get(id)) + '</div></div>' +
@@ -949,9 +973,9 @@
         (index + 1) + '</span></td><td><div class="name-line"><strong>' + escapeHtml(item.name) + "</strong>" +
         streakChip(statsMap.get(item.id)) +
         (state.active.includes(item.id)
-          ? ' <span class="active-tag">● AKTIF</span>'
+          ? ' <span class="active-tag">Aktif</span>'
           : item.onBreak
-          ? ' <span class="break-tag">☕ BREAK</span>'
+          ? ' <span class="break-tag">Break</span>'
           : "") +
         "</div>" + badgeMarkup(badgesFor(item, statsMap.get(item.id), badgeContext)) +
         '</td><td class="col-mid">' + item.rounds + '</td><td class="col-mid"><strong>' +
@@ -1031,8 +1055,8 @@
         '</span><strong>' + card.points + " poin</strong></div>"
       ).join("");
       $("openArenaBtn").textContent = pending.arena
-        ? "Lanjutkan Battle Arena · " + poolSize + " kartu →"
-        : "Masuk Battle Arena · " + poolSize + " kartu →";
+        ? "Lanjutkan Battle Arena · " + poolSize + " kartu"
+        : "Masuk Battle Arena · " + poolSize + " kartu";
       $("openArenaBtn").hidden = false;
       if (arenaOpen) renderArena();
       return;
@@ -1129,7 +1153,7 @@
     const wasHidden = $("arenaOverlay").hidden;
     $("arenaOverlay").hidden = false;
     document.body.classList.add("arena-open");
-    $("arenaMatchLabel").textContent = "MATCH " + pending.matchNumber + " · BATTLE ARENA";
+    $("arenaMatchLabel").textContent = "Match " + pending.matchNumber + " · Battle Arena";
 
     if (isRevealed) {
       $("arenaTitle").textContent = "Kartu dibuka";
@@ -1161,20 +1185,20 @@
       return '<div class="arena-duelist ' + (current ? "duelist-current" : pick ? "duelist-picked" : "") + '">' +
         '<div class="arena-duelist-number">' + String(index + 1).padStart(2, "0") + '</div>' +
         '<div class="arena-duelist-info"><strong>' + escapeHtml(item?.name || "Pemain") +
-        '</strong><span>' + pending.points[id] + ' poin match' + (current ? ' · GILIRANMU' : "") +
+        '</strong><span>' + pending.points[id] + ' poin match' + (current ? ' · Giliranmu' : "") +
         '</span></div><div class="arena-duelist-slot">' + slot + "</div></div>";
     }).join("");
 
     const pickedIds = new Set(arena.picks.map(pick => pick.cardId));
     const remaining = arena.cards.filter(card => !pickedIds.has(card.id));
     const reserveOnly = arena.picks.length === arena.players.length;
-    $("arenaDeckCount").textContent = remaining.length + " KARTU TERTUTUP";
+    $("arenaDeckCount").textContent = remaining.length + " kartu tertutup";
     $("arenaDeck").innerHTML = remaining.map((card, index) =>
       '<button class="arena-pick-card' + (reserveOnly ? " arena-extra-card" : "") + '" type="button" ' +
       (reserveOnly ? "disabled" : 'data-arena-card="' + card.id + '"') +
       ' aria-label="' + (reserveOnly ? "Kartu cadangan" : "Pilih kartu tertutup " + (index + 1)) + '"><span class="arena-card-index">' +
-      (reserveOnly ? "BONUS" : String(index + 1).padStart(2, "0")) + '</span><span class="arena-card-back">◆</span>' +
-      '<span class="arena-card-prompt">' + (reserveOnly ? "CADANGAN" : "PILIH") + "</span></button>"
+      (reserveOnly ? "Bonus" : String(index + 1).padStart(2, "0")) + '</span><span class="arena-card-back">◆</span>' +
+      '<span class="arena-card-prompt">' + (reserveOnly ? "Cadangan" : "Pilih") + "</span></button>"
     ).join("");
 
     $("arenaDeckWrap").hidden = isRevealed;
@@ -1184,24 +1208,53 @@
       const result = arena.result;
       const outgoing = result.outgoingIds;
       const winners = result.winnerIds;
-      $("arenaReveal").innerHTML = '<div class="arena-result-heading"><span>HASIL PENENTUAN</span><strong>' +
+      $("arenaReveal").innerHTML = '<div class="arena-result-heading"><span>Hasil penentuan</span><strong>' +
         result.cards.length + ' pemain · ' + (result.extraCard ? "1 kartu cadangan" : "") + "</strong></div>" +
         '<div class="arena-result-cards">' + result.cards.map(card => {
           const isOut = outgoing.includes(card.id);
           const isWinner = winners.includes(card.id);
           return '<article class="arena-final-card ' + (isOut ? "final-out" : isWinner ? "final-winner" : "") + '">' +
             '<div class="arena-final-name"><strong>' + escapeHtml(card.name) + '</strong><span>' +
-            (isOut ? "KELUAR" : isWinner ? "MENANG SERI" : "BERTAHAN") + '</span></div>' +
+            (isOut ? "Keluar" : isWinner ? "Menang seri" : "Bertahan") + '</span></div>' +
             dominoTileMarkup(card, false) + '<div class="arena-final-score">Poin match <b>' + card.points +
             '</b><span>Jumlah kartu <b>' + card.total + "</b></span></div></article>";
         }).join("") + "</div>" +
-        (result.extraCard ? '<div class="arena-extra"><span>KARTU CADANGAN</span>' + dominoTileMarkup(result.extraCard, true) +
+        (result.extraCard ? '<div class="arena-extra"><span>Kartu cadangan</span>' + dominoTileMarkup(result.extraCard, true) +
           '<small>Kartu tambahan ini tidak ikut menentukan hasil.</small></div>' : "");
-      $("arenaActions").innerHTML = '<button class="primary arena-finish" id="finishArenaBtn" type="button">Selesaikan battle →</button>';
+      $("arenaActions").innerHTML = '<button class="primary arena-finish" id="finishArenaBtn" type="button">Selesaikan battle</button>';
     } else if (arena.picks.length === arena.players.length) {
-      $("arenaActions").innerHTML = '<button class="primary arena-reveal-button" id="revealArenaBtn" type="button">Buka semua kartu →</button>';
+      $("arenaActions").innerHTML = '<button class="primary arena-reveal-button" id="revealArenaBtn" type="button">Buka semua kartu</button>';
     }
     if (wasHidden) requestAnimationFrame(() => $("closeArena").focus());
+  }
+
+  let suspenseTimer = null;
+  function revealWithSuspense() {
+    if (suspenseTimer) return;
+    const overlay = $("arenaOverlay");
+    const calm = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (calm) { revealArenaCards(); return; }
+    const count = document.createElement("div");
+    count.className = "arena-countdown";
+    count.setAttribute("aria-hidden", "true");
+    overlay.querySelector(".arena-window").appendChild(count);
+    overlay.classList.add("is-suspense");
+    const button = $("revealArenaBtn");
+    if (button) button.disabled = true;
+    let n = 3;
+    const finish = () => {
+      clearInterval(suspenseTimer); suspenseTimer = null;
+      count.remove(); overlay.classList.remove("is-suspense");
+      if (!overlay.hidden) revealArenaCards();
+    };
+    const tick = () => {
+      if (overlay.hidden) { finish(); return; }
+      if (n === 0) { finish(); return; }
+      count.textContent = n; count.style.animation = "none"; void count.offsetWidth; count.style.animation = "";
+      n -= 1;
+    };
+    tick();
+    suspenseTimer = setInterval(tick, 750);
   }
 
   function revealArenaCards() {
@@ -1265,7 +1318,7 @@
     const readyQueue = readyQueueIds();
     const breakPlayers = state.players.filter(p => p.onBreak);
     $("queuePill").textContent = readyQueue.length + " menunggu";
-    $("statusBadge").textContent = state.started ? "● SESI BERJALAN" : "● SIAP DIMULAI";
+    $("statusBadge").textContent = state.started ? "Sesi berjalan" : "Siap dimulai";
     $("roundInstructions").textContent = state.pendingBattle
       ? "Match " + state.pendingBattle.matchNumber + " selesai. Selesaikan tie-break di Battle Arena untuk melihat klasemen dan pergantian pemain."
       : state.started
@@ -1281,7 +1334,7 @@
         '</div><div class="queue-name">' + escapeHtml(item.name) +
         '<span class="queue-sub">' + item.points + ' poin · ' + item.rounds + ' ronde</span></div>' +
         '<button type="button" class="break-btn" data-break-queue="' + id +
-        '" title="Istirahat sementara"' + (state.pendingBattle ? " disabled" : "") + '>☕ Break</button>' +
+        '" title="Istirahat sementara"' + (state.pendingBattle ? " disabled" : "") + '>Break</button>' +
         '<button type="button" class="small-btn subtle" data-remove="' + id +
         '" title="Hapus dari sesi"' + (state.pendingBattle ? " disabled" : "") + '>×</button></div>';
     }).join("");
@@ -1289,11 +1342,11 @@
     $("breakSection").hidden = breakPlayers.length === 0;
     $("breakPill").textContent = breakPlayers.length + " break";
     $("breakList").innerHTML = breakPlayers.map(item =>
-      '<div class="queue-item is-break"><div class="queue-no">☕</div>' +
+      '<div class="queue-item is-break"><div class="queue-no">B</div>' +
       '<div class="queue-name">' + escapeHtml(item.name) +
       '<span class="queue-sub">Poin tersimpan: ' + item.points + ' poin (' + item.rounds + ' ronde)</span></div>' +
       '<button type="button" class="resume-btn" data-resume="' + item.id + '"' +
-      (state.pendingBattle ? " disabled" : "") + '>▶ Main lagi</button>' +
+      (state.pendingBattle ? " disabled" : "") + '>Main lagi</button>' +
       '<button type="button" class="small-btn subtle" data-remove="' + item.id +
       '" title="Hapus dari sesi"' + (state.pendingBattle ? " disabled" : "") + '>×</button></div>'
     ).join("");
@@ -1348,7 +1401,7 @@
     }
   });
   $("arenaActions").addEventListener("click", event => {
-    if (event.target.closest("#revealArenaBtn")) revealArenaCards();
+    if (event.target.closest("#revealArenaBtn")) revealWithSuspense();
     if (event.target.closest("#finishArenaBtn")) completeBattleArena();
   });
   document.addEventListener("keydown", event => {
